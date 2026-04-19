@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sci-Fi 3D VJ Visualizer - Pro Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Share+Tech+Mono&family=Montserrat:wght@100;300;900&family=Oswald:wght@700&display=swap');
+
+        :root {
+            /* Sci-Fi Default */
+            --primary: #ff2a55;
+            --secondary: #00e5ff;
+            --bg: #05000a;
+            --panel-bg: rgba(10, 0, 5, 0.7);
+            --panel-border: 1px solid rgba(255, 42, 85, 0.3);
+            --panel-shadow: 0 0 15px rgba(255, 42, 85, 0.1);
+            --font-main: 'Share Tech Mono', monospace;
+            --font-title: 'Share Tech Mono', monospace;
+            --text-shadow: none;
+            --bar-radius: 2px;
+            --btn-border: 1px solid var(--primary);
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: var(--bg); overflow: hidden;
+            font-family: var(--font-main); color: var(--primary);
+            user-select: none; transition: background-color 0.1s;
+        }
+
+        /* --- THEME OVERRIDES --- */
+        body.popart-mode {
+            --primary: #ffea00; --secondary: #ff0055; --bg: #000000; --panel-bg: #ffffff;
+            --panel-border: 4px solid #000000; --panel-shadow: 8px 8px 0px rgba(0,0,0,1);
+            --font-main: 'Bangers', cursive; --font-title: 'Bangers', cursive;
+            --text-shadow: 2px 2px 0px #000; --bar-radius: 0px; --btn-border: 4px solid #000;
+            color: #000 !important;
+        }
+        body.brutalist-mode {
+            --primary: #ffffff; --secondary: #aaaaaa; --bg: #0a0a0a; --panel-bg: rgba(20, 20, 20, 0.9);
+            --panel-border: 2px solid #555555; --panel-shadow: 10px 10px 20px rgba(0,0,0,0.8);
+            --font-main: 'Oswald', sans-serif; --font-title: 'Montserrat', sans-serif;
+            --text-shadow: none; --bar-radius: 0px; --btn-border: 2px solid #ffffff;
+            color: #ffffff !important;
+        }
+        body.retro-mode {
+            --primary: #fbc531; --secondary: #e84393; --bg: #192a56; --panel-bg: rgba(25, 42, 86, 0.85);
+            --panel-border: 2px solid #fbc531; --panel-shadow: 8px 8px 0px rgba(232, 67, 147, 0.5);
+            --font-main: 'Montserrat', sans-serif; --font-title: 'Oswald', sans-serif;
+            --text-shadow: 2px 2px 0px #192a56; --bar-radius: 8px; --btn-border: 2px solid #fbc531;
+            color: #f5f6fa !important;
+        }
+        body.cosmic-mode {
+            --primary: #2ed573; --secondary: #ffffff; --bg: #030308; --panel-bg: rgba(10, 10, 15, 0.7);
+            --panel-border: 1px solid rgba(255,255,255,0.1); --panel-shadow: 0 0 20px rgba(46, 213, 115, 0.1);
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; --font-title: 'Montserrat', sans-serif;
+            --text-shadow: 0 2px 10px rgba(0,0,0,0.8); --bar-radius: 4px; --btn-border: 1px solid #2ed573;
+            color: #ddd !important;
+        }
+        body.fractal-mode {
+            --primary: #a29bfe; --secondary: #00cec9; --bg: #030008; --panel-bg: rgba(10, 0, 20, 0.8);
+            --panel-border: 1px solid rgba(162, 155, 254, 0.3); --panel-shadow: 0 0 20px rgba(0, 206, 201, 0.2);
+            --font-main: 'Montserrat', sans-serif; --font-title: 'Share Tech Mono', monospace;
+            --text-shadow: 0 0 8px #a29bfe; --bar-radius: 4px; --btn-border: 1px solid #00cec9;
+            color: #e0e0e0 !important;
+        }
+
+        /* --- SPLASH SCREEN --- */
+        #splash-screen {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(5, 0, 10, 0.95); backdrop-filter: blur(8px);
+            z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 1s ease-in-out;
+        }
+        body.popart-mode #splash-screen { background-color: #ff0055; }
+        body.brutalist-mode #splash-screen { background-color: #111; }
+        body.retro-mode #splash-screen { background-color: #192a56; }
+        body.cosmic-mode #splash-screen { background-color: #030308; }
+        body.fractal-mode #splash-screen { background-color: #030008; }
+
+        .splash-title {
+            font-family: 'Montserrat', sans-serif; font-weight: 100; font-size: 2.5rem;
+            letter-spacing: 12px; color: var(--primary); text-align: center; margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 42, 85, 0.4); max-width: 80%; line-height: 1.4;
+        }
+        body.popart-mode .splash-title { font-family: 'Bangers'; font-weight: normal; letter-spacing: 5px; text-shadow: 4px 4px 0px #000; color: #ffea00; font-size: 4rem; }
+        body.brutalist-mode .splash-title { font-weight: 900; letter-spacing: 8px; text-shadow: none; color: #fff; }
+        body.retro-mode .splash-title { font-family: 'Oswald'; font-weight: 900; letter-spacing: 8px; text-shadow: 4px 4px 0px #e84393; color: #fbc531; font-size: 4rem; }
+        body.cosmic-mode .splash-title { font-weight: 300; letter-spacing: 12px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); color: #fff; }
+        body.fractal-mode .splash-title { font-weight: 900; letter-spacing: 15px; text-shadow: 0 0 30px #00cec9; color: #a29bfe; }
+        
+        .splash-subtitle { font-size: 0.9rem; color: #888; margin-bottom: 50px; letter-spacing: 3px; text-transform: uppercase; }
+        body.popart-mode .splash-subtitle { color: #fff; font-family: 'Bangers'; font-size: 1.2rem; text-shadow: 2px 2px 0px #000; }
+        body.brutalist-mode .splash-subtitle { color: #888; font-family: 'Oswald'; letter-spacing: 4px; }
+        body.retro-mode .splash-subtitle { color: #f5f6fa; font-family: 'Montserrat'; font-weight: bold; letter-spacing: 4px; }
+        body.cosmic-mode .splash-subtitle { color: #888; font-family: 'Segoe UI'; letter-spacing: 4px; }
+        body.fractal-mode .splash-subtitle { color: #00cec9; font-family: 'Share Tech Mono'; letter-spacing: 6px; }
+
+        .splash-btn {
+            background: transparent; border: var(--btn-border); color: var(--secondary);
+            padding: 15px 50px; font-size: 1.2rem; font-family: var(--font-title);
+            cursor: pointer; letter-spacing: 6px; text-transform: uppercase;
+            transition: all 0.3s ease; box-shadow: 0 0 15px rgba(0, 229, 255, 0.1);
+        }
+        body.popart-mode .splash-btn { background: #ffea00; color: #000; box-shadow: 6px 6px 0px #000; letter-spacing: 2px; }
+        body.popart-mode .splash-btn:hover { background: #00e5ff; transform: translate(-4px, -4px); box-shadow: 10px 10px 0px #000; }
+        body.brutalist-mode .splash-btn { background: #fff; color: #000; box-shadow: none; font-weight: 900; }
+        body.brutalist-mode .splash-btn:hover { background: #555; color: #fff; border-color: #555; }
+        body.retro-mode .splash-btn { background: #e84393; color: #fff; box-shadow: 6px 6px 0px #fbc531; border: 2px solid #fff; border-radius: 8px;}
+        body.retro-mode .splash-btn:hover { background: #fbc531; color: #192a56; box-shadow: 10px 10px 0px #e84393; transform: translate(-4px, -4px); }
+        body.cosmic-mode .splash-btn { background: rgba(46, 213, 115, 0.2); color: #2ed573; box-shadow: 0 0 15px rgba(46, 213, 115, 0.2); border-radius: 30px; }
+        body.fractal-mode .splash-btn { background: rgba(162, 155, 254, 0.1); color: #00cec9; box-shadow: 0 0 20px rgba(0, 206, 201, 0.3); border-radius: 4px; }
+        .splash-btn:hover { background: var(--secondary); color: var(--bg); box-shadow: 0 0 30px var(--secondary); transform: scale(1.05); }
+
+        #webgl-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; transition: transform 0.05s; }
+        #aura-canvas { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2; display: none; pointer-events: none; }
+
+        /* HUD Overlay */
+        #hud-layer {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 10; pointer-events: none;
+            display: flex; justify-content: space-between; padding: 20px; box-sizing: border-box;
+            background: radial-gradient(circle at center, transparent 50%, rgba(20, 0, 10, 0.4) 100%); transition: opacity 0.3s;
+        }
+        body.popart-mode #hud-layer, body.brutalist-mode #hud-layer, body.retro-mode #hud-layer, body.cosmic-mode #hud-layer, body.fractal-mode #hud-layer { background: none; }
+
+        .hud-panel {
+            background: var(--panel-bg); border: var(--panel-border); padding: 15px; backdrop-filter: blur(4px);
+            box-shadow: var(--panel-shadow); width: 250px; height: fit-content; margin-bottom: 15px;
+            pointer-events: auto; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        body.popart-mode .hud-panel { transform: rotate(-1.5deg); }
+        body.popart-mode .hud-panel:nth-child(2) { transform: rotate(1deg); }
+        body.brutalist-mode .hud-panel { border-radius: 0; border: 1px solid #444; }
+        body.retro-mode .hud-panel { border-radius: 12px; }
+        body.cosmic-mode .hud-panel { border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(12px); }
+        body.fractal-mode .hud-panel { border-radius: 8px; border-left: 3px solid #00cec9; backdrop-filter: blur(12px); }
+
+        .hud-title {
+            font-family: var(--font-title); font-size: 1rem; letter-spacing: 2px;
+            border-bottom: 2px solid var(--primary); padding-bottom: 5px; margin-bottom: 10px; text-transform: uppercase;
+        }
+        body.popart-mode .hud-title { font-size: 1.5rem; letter-spacing: 1px; border-bottom: 4px solid #000; color: #ff0055; text-shadow: 1px 1px 0px #000;}
+        body.brutalist-mode .hud-title { font-weight: 900; letter-spacing: 3px; color: #fff; border-bottom: 1px solid #fff; }
+        body.retro-mode .hud-title { font-weight: 700; letter-spacing: 2px; color: #fbc531; border-bottom: 3px solid #e84393; }
+        body.cosmic-mode .hud-title { font-weight: 300; font-size: 0.9rem; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        body.fractal-mode .hud-title { font-weight: 900; letter-spacing: 4px; color: #a29bfe; border-bottom: 1px solid rgba(0, 206, 201, 0.5); }
+
+        .effect-list { list-style: none; padding: 0; margin: 0; max-height: 250px; overflow-y: auto; padding-right: 5px; }
+        .effect-list::-webkit-scrollbar { width: 6px; }
+        .effect-list::-webkit-scrollbar-track { background: rgba(255, 42, 85, 0.1); }
+        .effect-list::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 2px; }
+        
+        body.popart-mode .effect-list::-webkit-scrollbar-track { background: #eee; border-left: 2px solid #000; }
+        body.popart-mode .effect-list::-webkit-scrollbar-thumb { background: #ff0055; border: 1px solid #000; border-radius: 0; }
+        body.brutalist-mode .effect-list::-webkit-scrollbar-track { background: #222; }
+        body.brutalist-mode .effect-list::-webkit-scrollbar-thumb { background: #fff; border-radius: 0; }
+        body.retro-mode .effect-list::-webkit-scrollbar-track { background: #2f3640; border-radius: 4px;}
+        body.retro-mode .effect-list::-webkit-scrollbar-thumb { background: #e84393; border-radius: 4px; }
+        body.cosmic-mode .effect-list::-webkit-scrollbar-track { background: transparent; }
+        body.cosmic-mode .effect-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+        body.fractal-mode .effect-list::-webkit-scrollbar-track { background: transparent; }
+        body.fractal-mode .effect-list::-webkit-scrollbar-thumb { background: #00cec9; border-radius: 4px; }
+
+        .effect-item { font-size: 0.7rem; margin-bottom: 8px; display: flex; flex-direction: column; align-items: flex-start; opacity: 0.5; transition: all 0.1s; }
+        body.popart-mode .effect-item { font-size: 1rem; opacity: 0.7; }
+        body.brutalist-mode .effect-item { font-size: 0.85rem; opacity: 0.4; letter-spacing: 1px;}
+        body.retro-mode .effect-item { font-size: 0.8rem; opacity: 0.6; font-weight: 600;}
+        body.cosmic-mode .effect-item { font-size: 0.8rem; opacity: 0.6; }
+        body.fractal-mode .effect-item { font-size: 0.8rem; font-weight: bold; opacity: 0.6; }
+
+        .effect-item-header { display: flex; align-items: center; width: 100%; }
+        .effect-item.active { opacity: 1; color: var(--secondary); text-shadow: var(--text-shadow); }
+        body.popart-mode .effect-item.active { color: #000; text-shadow: none; font-weight: bold; background: #ffea00; padding-left: 5px; border: 2px solid #000; box-shadow: 2px 2px 0px #000;}
+        body.brutalist-mode .effect-item.active { color: #fff; opacity: 1; font-weight: bold; text-shadow: none; }
+        body.retro-mode .effect-item.active { color: #fbc531; opacity: 1; text-shadow: 1px 1px 0px #e84393; }
+        body.cosmic-mode .effect-item.active { color: #2ed573; opacity: 1; text-shadow: 0 0 8px rgba(46, 213, 115, 0.5); }
+        body.fractal-mode .effect-item.active { color: #00cec9; text-shadow: 0 0 10px #00cec9; }
+
+        .effect-value-bar { height: 4px; background: var(--secondary); margin-top: 4px; border-radius: var(--bar-radius); box-shadow: 0 0 5px var(--secondary); transition: width 0.05s; }
+        body.popart-mode .effect-value-bar { height: 8px; background: #00e5ff; border: 2px solid #000; box-shadow: none; }
+        body.brutalist-mode .effect-value-bar { background: #fff; box-shadow: none; }
+        body.retro-mode .effect-value-bar { background: #4cd137; height: 6px; box-shadow: none; }
+        body.cosmic-mode .effect-value-bar { background: #2ed573; box-shadow: none; border-radius: 4px; }
+        body.fractal-mode .effect-value-bar { background: #00cec9; box-shadow: 0 0 8px #00cec9; }
+
+        .key-badge {
+            display: inline-block; background: rgba(255, 255, 255, 0.1); border: 1px solid currentColor;
+            padding: 2px 6px; margin-right: 10px; border-radius: var(--bar-radius); min-width: 15px;
+            text-align: center; font-weight: bold; text-transform: uppercase;
+        }
+        body.popart-mode .key-badge { background: #ff0055; color: #fff; border: 2px solid #000; text-shadow: 1px 1px 0px #000; }
+        body.brutalist-mode .key-badge { background: #fff; color: #000; border: none; }
+        body.retro-mode .key-badge { background: #e84393; color: #fff; border: none; text-shadow: none; }
+        body.cosmic-mode .key-badge { background: transparent; color: currentColor; border: 1px solid currentColor; border-radius: 4px;}
+        body.fractal-mode .key-badge { background: rgba(0, 206, 201, 0.2); color: #00cec9; border: 1px solid #00cec9; }
+
+        #scanlines {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 20; pointer-events: none;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background-size: 100% 4px; opacity: 0; transition: opacity 0.1s;
+        }
+        body.scifi-mode #scanlines { opacity: 0.3; } 
+        body.retro-mode #scanlines { opacity: 0.1; background: url('data:image/svg+xml;utf8,<svg width="4" height="4" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="1" fill="white"/></svg>'); background-size: 4px 4px; }
+        body.fractal-mode #scanlines { opacity: 0.1; background-size: 100% 2px;}
+
+        .mode-controls {
+            position: absolute; bottom: 20px; left: 20px; z-index: 50; display: flex; flex-wrap: wrap; gap: 10px; max-width: 800px; pointer-events: auto; align-items: center;
+        }
+
+        .top-btn {
+            background: var(--panel-bg); border: var(--btn-border); color: var(--primary); padding: 8px 15px;
+            font-family: var(--font-title); font-size: 0.8rem; cursor: pointer; text-transform: uppercase;
+            transition: all 0.2s; box-shadow: var(--panel-shadow); backdrop-filter: blur(4px);
+        }
+        body.popart-mode .top-btn { font-size: 1.2rem; letter-spacing: 1px; }
+        body.brutalist-mode .top-btn { font-weight: 900; letter-spacing: 2px; }
+        body.retro-mode .top-btn { font-weight: bold; border-radius: 8px; font-size: 1rem; }
+        body.cosmic-mode .top-btn { font-size: 0.8rem; border-radius: 20px; font-family: 'Segoe UI'; letter-spacing: 1px; }
+        body.fractal-mode .top-btn { font-weight: bold; border-left: 4px solid #00cec9; border-radius: 4px; }
+        
+        .top-btn:hover, .top-btn.active { background: var(--primary); color: var(--bg); box-shadow: 0 0 15px var(--primary); }
+        body.popart-mode .top-btn:hover, body.popart-mode .top-btn.active { background: #00e5ff; color: #000; transform: translate(-4px, -4px); box-shadow: 8px 8px 0px #000; }
+        body.brutalist-mode .top-btn:hover, body.brutalist-mode .top-btn.active { background: #fff; color: #000; box-shadow: none; }
+        body.retro-mode .top-btn:hover, body.retro-mode .top-btn.active { background: #fbc531; color: #192a56; box-shadow: 4px 4px 0px #e84393; transform: translate(-2px, -2px); }
+        body.cosmic-mode .top-btn:hover, body.cosmic-mode .top-btn.active { background: #2ed573; color: #000; box-shadow: 0 0 15px #2ed573; }
+        body.fractal-mode .top-btn:hover, body.fractal-mode .top-btn.active { background: #00cec9; color: #090014; box-shadow: 0 0 20px #00cec9; }
+
+    </style>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body class="scifi-mode">
+
+    <div id="splash-screen">
+        <div class="splash-title">WELCOME TO SHASTRIS VISUAL TRIGGER STUDIO</div>
+        <div class="splash-subtitle">(Connect MIDI Keyboard & Allow Microphone Access)</div>
+        <button class="splash-btn" id="initiate-btn">INITIATE & CONNECT</button>
+    </div>
+
+    <div id="webgl-container"></div>
+    <canvas id="aura-canvas"></canvas>
+    <div id="scanlines"></div>
+    
+    <div id="hud-layer">
+        <div style="display: flex; flex-direction: column;">
+            <div class="hud-panel">
+                <div class="hud-title" id="scenes-title">Scenes (TRIGGER A-Y)</div>
+                <ul class="effect-list" id="scenes-list"></ul>
+            </div>
+            <div class="hud-panel">
+                <div class="hud-title">FX Engine (KNOBS 1-8)</div>
+                <ul class="effect-list" id="effects-list"></ul>
+            </div>
+        </div>
+
+        <div class="mode-controls" id="mode-controls-container">
+            <button id="bank-toggle-btn" class="top-btn" style="border-color: #00e5ff; color: #00e5ff; background: rgba(0,0,0,0.8);">BANK: SCI-FI NEON (PAD 2)</button>
+            <button id="mode-toggle-btn" class="top-btn">MODE: TRIGGER (PAD 3)</button>
+            <button id="ui-toggle-btn" class="top-btn">TOGGLE UI (PAD 4)</button>
+            <button id="reset-fx-btn" class="top-btn" style="border-color: #ff2a55;">RESET FX (PAD 5)</button>
+            <button id="oh-shit-btn" class="top-btn" style="border-color: #ffea00; color: #ffea00;">OH SHIT! (OFF)</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js';
+        import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+        import { RGBShiftShader } from 'three/addons/shaders/RGBShiftShader.js';
+        import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+        // --- GLOBAL COLOR FLASH VARIABLES ---
+        let bgFlashColor = new THREE.Color(0x000000);
+        let bgFlashIntensity = 0.0;
+        let isOhShitMode = false;
+
+        function triggerBgFlash(keyCodeOrNote) {
+            if (isOhShitMode) {
+                // Determine a unique hue based on the key
+                const hue = (keyCodeOrNote * 137.5) % 360; 
+                bgFlashColor.setHSL(hue / 360, 1.0, 0.5);
+                bgFlashIntensity = 1.0;
+            }
+        }
+
+        // --- CUSTOM SHADERS ---
+        const PopArtShader = {
+            uniforms: { "tDiffuse": { value: null }, "gridSize": { value: 1.0 }, "dotScale": { value: 0.0 }, "paperGrain": { value: 0.0 } },
+            vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+            fragmentShader: `
+                uniform sampler2D tDiffuse; uniform float gridSize; uniform float dotScale; uniform float paperGrain; varying vec2 vUv;
+                float rand(vec2 co){ return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453); }
+                void main() {
+                    vec2 uv = fract(vUv * gridSize); vec4 color = texture2D(tDiffuse, uv);
+                    if (color.a < 0.1) { gl_FragColor = color; return; }
+                    if (gridSize > 1.5) {
+                        float colIndex = floor(vUv.x * gridSize) + floor(vUv.y * gridSize) * 2.0;
+                        if (mod(colIndex, 3.0) == 0.0) color.rgb *= vec3(1.2, 0.5, 0.8); else if (mod(colIndex, 3.0) == 1.0) color.rgb *= vec3(0.5, 1.2, 0.5); else color.rgb *= vec3(0.5, 0.8, 1.2);
+                    }
+                    if (dotScale > 0.0) {
+                        float dotSize = 10.0 + (1.0 - dotScale) * 40.0; vec2 dotUV = vUv * 800.0 / dotSize; 
+                        float pattern = sin(dotUV.x) * sin(dotUV.y); float lum = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+                        if (lum < pattern * 0.5 + 0.5) color.rgb -= vec3(0.3 * dotScale);
+                    }
+                    if (paperGrain > 0.0) {
+                        float noise = rand(vUv * 100.0); vec3 sepia = vec3(1.0, 0.9, 0.8);
+                        color.rgb = mix(color.rgb, color.rgb * sepia * (0.8 + 0.2*noise), paperGrain);
+                    }
+                    gl_FragColor = color;
+                }
+            `
+        };
+
+        const BrutalistShader = {
+            uniforms: { "tDiffuse": { value: null }, "kaleidoscope": { value: 0.0 }, "contrast": { value: 0.0 }, "aspect": { value: 1.0 } },
+            vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+            fragmentShader: `
+                uniform sampler2D tDiffuse; uniform float kaleidoscope; uniform float contrast; uniform float aspect; varying vec2 vUv;
+                void main() {
+                    vec2 uv = vUv;
+                    if (kaleidoscope > 0.0) {
+                        float splits = floor(1.0 + kaleidoscope * 14.0); 
+                        vec2 centered = uv - 0.5; centered *= vec2(splits * aspect, splits);
+                        vec2 iuv = floor(centered); vec2 fuv = fract(centered);
+                        fuv.x = mod(iuv.x, 2.0) > 0.5 ? 1.0 - fuv.x : fuv.x; fuv.y = mod(iuv.y, 2.0) > 0.5 ? 1.0 - fuv.y : fuv.y;
+                        uv = fuv;
+                    }
+                    vec4 color = texture2D(tDiffuse, uv); vec3 finalColor = color.rgb;
+                    if (contrast > 0.0) { finalColor = (finalColor - 0.5) * (1.0 + contrast * 3.0) + 0.5; }
+                    gl_FragColor = vec4(finalColor, color.a);
+                }
+            `
+        };
+
+        const RetroShader = {
+            uniforms: {
+                "tDiffuse": { value: null },
+                "gridMult": { value: 1.0 },
+                "kaleidoscope": { value: 0.0 },
+                "hueShift": { value: 0.0 },
+                "aspect": { value: 1.0 }
+            },
+            vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+            fragmentShader: `
+                uniform sampler2D tDiffuse; uniform float gridMult; uniform float kaleidoscope; uniform float hueShift; uniform float aspect; varying vec2 vUv;
+                vec3 hsv2rgb(vec3 c) { vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0); vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www); return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y); }
+                vec3 rgb2hsv(vec3 c) { vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0); vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g)); vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r)); float d = q.x - min(q.w, q.y); float e = 1.0e-10; return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x); }
+                void main() {
+                    vec2 uv = vUv;
+                    if (gridMult > 1.0) {
+                        float splits = floor(gridMult);
+                        vec2 centered = uv - 0.5; centered *= vec2(splits * aspect, splits);
+                        vec2 iuv = floor(centered); vec2 fuv = fract(centered);
+                        fuv.x = mod(iuv.x, 2.0) > 0.5 ? 1.0 - fuv.x : fuv.x; fuv.y = mod(iuv.y, 2.0) > 0.5 ? 1.0 - fuv.y : fuv.y;
+                        uv = fuv;
+                    }
+                    if (kaleidoscope > 0.0) {
+                        float segments = floor(2.0 + kaleidoscope * 10.0);
+                        vec2 centered = uv - 0.5; centered.x *= aspect; 
+                        float radius = length(centered); float angle = atan(centered.y, centered.x);
+                        float segmentAngle = 6.28318530718 / segments;
+                        angle = mod(angle, segmentAngle); angle = abs(angle - segmentAngle / 2.0);
+                        centered = radius * vec2(cos(angle), sin(angle));
+                        centered.x /= aspect; uv = 0.5 + centered;
+                    }
+                    vec4 color = texture2D(tDiffuse, uv);
+                    if (hueShift > 0.0) {
+                        vec3 hsv = rgb2hsv(color.rgb); hsv.x = fract(hsv.x + hueShift); color.rgb = hsv2rgb(hsv);
+                    }
+                    gl_FragColor = color;
+                }
+            `
+        };
+
+        const FractalShader = {
+            uniforms: {
+                "tDiffuse": { value: null },
+                "time": { value: 0.0 },
+                "resolution": { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+                "zoom": { value: 0.5 },
+                "density": { value: 0.5 },
+                "glow": { value: 0.5 },
+                "chaos": { value: 0.0 },
+                "hueShift": { value: 0.0 },
+                "rotation": { value: 0.5 },
+                "symmetry": { value: 0.0 },
+                "pulse": { value: 0.0 },
+                "sceneIndex": { value: 0.0 }, 
+                "color1": { value: new THREE.Color(0xa29bfe) },
+                "color2": { value: new THREE.Color(0x00cec9) },
+                "flashColor": { value: new THREE.Color(0x000000) },
+                "flashIntensity": { value: 0.0 }
+            },
+            vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+            fragmentShader: `
+                uniform float time; uniform vec2 resolution; uniform float zoom; uniform float density; uniform float glow; uniform float chaos;
+                uniform float hueShift; uniform float rotation; uniform float symmetry; uniform float pulse; uniform float sceneIndex;
+                uniform vec3 color1; uniform vec3 color2; 
+                uniform vec3 flashColor; uniform float flashIntensity;
+                varying vec2 vUv;
+                vec3 hsv2rgb(vec3 c) { vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0); vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www); return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y); }
+                void main() {
+                    vec2 p = (vUv - 0.5) * 2.0; p.x *= resolution.x / resolution.y;
+                    float rotSpeed = (rotation - 0.5) * 2.0; float a = time * rotSpeed * 0.5; float s = sin(a), c = cos(a);
+                    p = vec2(p.x * c - p.y * s, p.x * s + p.y * c);
+                    if (symmetry > 0.05) {
+                        float splits = floor(1.0 + symmetry * 11.0); float angle = atan(p.y, p.x); float radius = length(p);
+                        float segment = 6.28318530718 / splits; angle = mod(angle, segment); angle = abs(angle - segment / 2.0);
+                        p = radius * vec2(cos(angle), sin(angle));
+                    }
+                    float z = exp(-zoom * 4.0 - pulse * 0.2) * 2.0; p *= z;
+                    p += vec2(sin(time*0.1), cos(time*0.15)) * chaos;
+                    float trap = 100.0; float trap2 = 100.0; vec2 zf = p;
+                    float sIndex = mod(sceneIndex, 26.0); float maxIter = floor(8.0 + (sIndex * 0.5) + density * 50.0);
+                    vec2 shift = vec2(0.4 + sIndex * 0.02 + chaos * 0.1, 0.4 + sin(sIndex)*0.2 + sin(time*0.1)*0.1 * chaos);
+                    for(float i=0.; i<60.0; i++) {
+                        if (i > maxIter) break;
+                        if (sIndex < 5.0) { zf = abs(zf) / clamp(dot(zf, zf), 0.1, 1.0) - shift; }
+                        else if (sIndex < 10.0) { zf = abs(zf) / dot(zf, zf) - shift * 1.2; }
+                        else if (sIndex < 15.0) { zf = abs(zf) / clamp(dot(zf, zf), 0.2, 0.8) - shift * vec2(0.8, 1.2); zf.y += sin(zf.x * 2.0) * 0.1; }
+                        else if (sIndex < 20.0) { zf = clamp(zf, -1.0, 1.0) * 2.0 - zf; zf = zf * clamp(max(0.2, 1.0/dot(zf,zf)), 0.0, 1.0) - shift; }
+                        else { zf = abs(zf) / clamp(dot(zf, zf), 0.15, 0.9) - shift * 1.5; zf.x += cos(zf.y * 3.0) * 0.1; }
+                        float rotOffset = time * 0.05 + sIndex; float s2 = sin(rotOffset), c2 = cos(rotOffset);
+                        zf = vec2(zf.x * c2 - zf.y * s2, zf.x * s2 + zf.y * c2);
+                        trap = min(trap, length(zf)); trap2 = min(trap2, abs(zf.x * zf.y));
+                    }
+                    float h = hueShift + trap * 1.5 - time * 0.1 + (sIndex * 0.05); vec3 baseC = hsv2rgb(vec3(h, 0.8, 1.0));
+                    vec3 finalColor = mix(color1, color2, clamp(trap2 * 4.0, 0.0, 1.0)); finalColor *= baseC;
+                    finalColor += color1 * (glow * 2.0 * exp(-trap * (5.0 - glow*3.0)));
+                    finalColor += color2 * pulse * exp(-trap * 10.0);
+                    finalColor = mix(finalColor, flashColor, flashIntensity * 0.7); // Apply flash
+                    gl_FragColor = vec4(finalColor, 1.0);
+                }
+            `
+        };
+
+        // --- 1. CONFIGURATION & 6 BANKS ---
+        const sciFiSceneNames = [
+            'CORE ANOMALY', 'KINETIC RINGS', 'NEON TUNNEL', 'NEON WAVES', 'HYPERSPACE', 'SACRED GEOMETRY', 'SPECTRUM AURA', 'THE MONOLITH', 'TORUS KNOT', 'MATRIX RAIN',
+            'PULSING SPHERE', 'FRACTAL CRYSTAL', 'CYBER GRID', 'PARTICLE VORTEX', 'DNA HELIX', 'QUANTUM FOAM', 'DIGITAL CITY', 'FRACTAL STAR', 'METATRON CUBE', 'HYPERCUBE',
+            'STELLATED PRISM', 'HYPNOTIC CIRCLE', 'CRYSTAL LATTICE', 'SACRED FLOWER', 'KINETIC ORB'
+        ];
+        const popArtSceneNames = [
+            'POW EXPLOSION', 'WARHOL CAN', 'SPEECH BUBBLE', 'VINYL RECORD', 'LIGHTNING BOLT', 'PILL DROP', '3D STAR', 'CHERRY LIPS', 'EYEBALL', 'RETRO TV',
+            'POP RINGS', 'BANG CLOUD', 'ACTION SWIRL', 'COMIC BOMB', 'RETRO PHONE', 'DOT SPHERE', 'ZAP BOLT', 'CRASH BURST', 'UFO DISK', 'POP TORNADO',
+            'SMILEY FACE', 'RAY GUN', 'KABOOM CONE', 'MEGA DIAMOND', 'POP HALO'
+        ];
+        const brutalistSceneNames = [
+            'GEISEL INVERT', 'RADAR ARRAY', 'CASCADING SLABS', 'THE MONOLITH', 'HEX TOWER', 'FLOATING GRID', 'BRUTAL CROSS', 'HOUSING UNIT', 'VENTILATION SHAFT', 'CONCRETE BEHEMOTH',
+            'INTERLOCKING CORES', 'STEPPED ZIGGURAT', 'PILLAR HALL', 'HEAVY ROTOR', 'BLOC WALL', 'OBELISK ARRAY', 'CANTILEVER WINGS', 'FORTRESS CORE', 'BUNKER SPHERE', 'ANGLED BUTTRESS',
+            'RIBBED CYLINDER', 'TETRIS HOUSING', 'VOID FRAME', 'SQUARE APERTURE', 'TENSION BRIDGE'
+        ];
+        const retroSceneNames = [
+            'THE ARCH', 'CONCENTRIC RINGS', 'CHECKERBOARD', 'BAUHAUS FLOWER', 'SUNBURST', 'SQUIGGLE TUBE', 'ABSTRACT EYE', 'THE CAPSULE', 'HOURGLASS', '4-POINT STAR',
+            'ASTERISK CROSS', 'SWISS CROSS', 'SPLIT CIRCLE', 'STAGGERED STEPS', 'SINE WAVES', 'INTERLOCK RINGS', 'CHEVRON DROP', 'RETRO HEART', 'DIAMOND PRISM', 'CRESCENT MOON',
+            'PLUS MINUS', 'THE TARGET', 'SPRING COIL', 'TEARDROPS', 'GEOMETRIC FACE'
+        ];
+        const cosmicSceneNames = [
+            'COSMIC SEED', 'SOLAR FLARE', 'NEBULA DRIFT', 'AURORA BOREALIS', 'SUPERNOVA', 'DARK MATTER', 'PULSAR BEAM', 'EVENT HORIZON', 'ASTRAL PROJECTION', 'STELLAR NURSERY',
+            'QUASAR WAVES', 'QUANTUM FOAM', 'GALACTIC CORE', 'VOID ENERGY', 'PHOTON BURST', 'CELESTIAL WIND', 'GRAVITY WELL', 'ION DRIVE', 'PLASMA STORM', 'ORBITAL RESONANCE',
+            'STAR DUST', 'MAGNETIC FIELD', 'SPACE DILATION', 'HYPER REALM', 'ECLIPSE RING'
+        ];
+        const fractalSceneNames = [
+            'MANDELBROT DUST', 'JULIA SET', 'NEBULA SPIRAL', 'COSMIC WEB', 'MATH ATTRACTOR', 'STRANGE LOOP', 'RECURSION', 'FIBONACCI WAVES', 'GOLDEN RATIO', 'FRACTAL STAR',
+            'DIMENSIONAL TEAR', 'HYPER ZOOM', 'MATH FRACTURE', 'CHAOS THEORY', 'L-SYSTEM', 'FRACTAL TREE', 'ENDLESS DIVE', 'GEOMETRY STORM', 'VOID SPIRAL', 'QUANTUM STRING',
+            'FRACTAL FLOWER', 'TESSERACT UNFOLD', 'INFINITY MIRROR', 'FRACTAL GHOST', 'MATH MATRIX'
+        ];
+
+        const BANKS = [
+            { // BANK 0: SCI-FI
+                id: 'SCIFI', name: 'SCI-FI NEON', class: 'scifi-mode', color: '#00e5ff',
+                scenes: sciFiSceneNames.map((name, i) => ({ id: String.fromCharCode(65 + i), key: String.fromCharCode(97 + i), name, active: false, fade: 0 })),
+                effects: [
+                    { id: '1', key: '1', name: 'CAMERA SHAKE', value: 0 }, { id: '2', key: '2', name: 'STROBE PULSE', value: 0 },
+                    { id: '3', key: '3', name: 'HUE SHIFT', value: 0 }, { id: '4', key: '4', name: 'INVERT COLORS', value: 0 },
+                    { id: '5', key: '5', name: 'CAMERA ORBIT', value: 0 }, { id: '6', key: '6', name: 'FOV WARP', value: 0 },
+                    { id: '7', key: '7', name: 'UNASSIGNED', value: 0 }, { id: '8', key: '8', name: 'SYSTEM GLITCH', value: 0 }
+                ]
+            },
+            { // BANK 1: POP ART
+                id: 'POPART', name: 'POP ART COMIC', class: 'popart-mode', color: '#ffea00',
+                scenes: popArtSceneNames.map((name, i) => ({ id: String.fromCharCode(65 + i), key: String.fromCharCode(97 + i), name, active: false, fade: 0 })),
+                effects: [
+                    { id: '1', key: '1', name: 'DOT SCREEN', value: 0 }, { id: '2', key: '2', name: 'WARHOL MULTIPLY', value: 0 },
+                    { id: '3', key: '3', name: 'SQUASH & STRETCH', value: 0 }, { id: '4', key: '4', name: 'COLOR SNAP', value: 0 },
+                    { id: '5', key: '5', name: 'SPEED LINES', value: 0 }, { id: '6', key: '6', name: 'PAPER TEXTURE', value: 0 },
+                    { id: '7', key: '7', name: 'UNASSIGNED', value: 0 }, { id: '8', key: '8', name: 'COMIC FLASH', value: 0 }
+                ]
+            },
+            { // BANK 2: BRUTALIST
+                id: 'BRUTALIST', name: 'BRUTALIST CONCRETE', class: 'brutalist-mode', color: '#ffffff',
+                scenes: brutalistSceneNames.map((name, i) => ({ id: String.fromCharCode(65 + i), key: String.fromCharCode(97 + i), name, active: false, fade: 0 })),
+                effects: [
+                    { id: '1', key: '1', name: '15x15 GRID', value: 0 }, { id: '2', key: '2', name: 'CONTRAST CRUSH', value: 0 },
+                    { id: '3', key: '3', name: 'VERTICAL EXTRUDE', value: 0 }, { id: '4', key: '4', name: 'HORIZ EXTRUDE', value: 0 },
+                    { id: '5', key: '5', name: 'RANDOM ORBIT', value: 0 }, { id: '6', key: '6', name: 'WIDE LENS', value: 0 },
+                    { id: '7', key: '7', name: 'UNASSIGNED', value: 0 }, { id: '8', key: '8', name: 'INVERT SILHOUETTE', value: 0 }
+                ]
+            },
+            { // BANK 3: RETRO GEOMETRY
+                id: 'RETRO', name: 'RETRO GEOMETRY', class: 'retro-mode', color: '#fbc531',
+                scenes: retroSceneNames.map((name, i) => ({ id: String.fromCharCode(65 + i), key: String.fromCharCode(97 + i), name, active: false, fade: 0 })),
+                effects: [
+                    { id: '1', key: '1', name: 'GRID MULTIPLY', value: 0.0 }, { id: '2', key: '2', name: 'STROBE', value: 0.0 },
+                    { id: '3', key: '3', name: 'HUE CYCLE', value: 0.0 }, { id: '4', key: '4', name: 'SHAKE', value: 0.0 },
+                    { id: '5', key: '5', name: 'KALEIDOSCOPE', value: 0.0 }, { id: '6', key: '6', name: 'SNAP SPIN', value: 0.0 },
+                    { id: '7', key: '7', name: '3D EXTRUDE', value: 0.0 }, { id: '8', key: '8', name: 'KINETIC BOUNCE', value: 0.0 }
+                ]
+            },
+            { // BANK 4: COSMIC AURA (Canvas 2D)
+                id: 'COSMIC', name: 'COSMIC AURA', class: 'cosmic-mode', color: '#2ed573',
+                scenes: cosmicSceneNames.map((name, i) => ({ id: String.fromCharCode(65 + i), key: String.fromCharCode(97 + i), name, active: false, fade: 0 })),
+                effects: [
+                    { id: '1', key: '1', name: 'SWIRL SPEED', value: 0.5 }, { id: '2', key: '2', name: 'AURA SIZE', value: 0.5 },
+                    { id: '3', key: '3', name: 'GLOW OPACITY', value: 0.5 }, { id: '4', key: '4', name: 'FADE SPEED', value: 0.5 },
+                    { id: '5', key: '5', name: 'HUE SHIFT', value: 0.0 }, { id: '6', key: '6', name: 'TURBULENCE', value: 0.0 },
+                    { id: '7', key: '7', name: 'UNASSIGNED', value: 0.0 }, { id: '8', key: '8', name: 'SATURATION', value: 0.5 }
+                ]
+            },
+            { // BANK 5: FRACTAL UNIVERSE (WEBGL SHADER)
+                id: 'FRACTAL', name: 'FRACTAL UNIVERSE', class: 'fractal-mode', color: '#00cec9',
+                scenes: fractalSceneNames.map((name, i) => ({ id: String.fromCharCode(65 + i), key: String.fromCharCode(97 + i), name, active: false, fade: 0 })),
+                effects: [
+                    { id: '1', key: '1', name: 'ZOOM SPEED', value: 0.5 }, { id: '2', key: '2', name: 'SPIRAL DENSITY', value: 0.5 },
+                    { id: '3', key: '3', name: 'GLOW INTENSITY', value: 0.5 }, { id: '4', key: '4', name: 'CHAOS MULTIPLIER', value: 0.0 },
+                    { id: '5', key: '5', name: 'HUE SHIFT', value: 0.0 }, { id: '6', key: '6', name: 'ROTATION SPEED', value: 0.5 },
+                    { id: '7', key: '7', name: 'UNASSIGNED', value: 0.0 }, { id: '8', key: '8', name: 'FRACTAL SYMMETRY', value: 0.0 }
+                ]
+            }
+        ];
+
+        // Shared Palette for Mapped Notes
+        const genColors = [ 
+            [210/360,1.0,0.5], [275/360,1.0,0.35], [180/360,1.0,0.5], [320/360,1.0,0.5], [270/360,0.76,0.53], [300/360,1.0,0.5], 
+            [180/360,1.0,0.25], [328/360,1.0,0.54], [15/360,1.0,0.5], [33/360,1.0,0.5], [51/360,1.0,0.5], [39/360,1.0,0.5] 
+        ];
+        
+        const auraColors = [ [210,100,50], [275,100,35], [180,100,50], [320,100,50], [270,76,53], [300,100,50], [180,100,25], [328,100,54], [15,100,50], [33,100,50], [51,100,50], [39,100,50] ];
+
+        let activeBankIdx = 0;
+        let beatScale = 1.0;
+        let targetRotX = 0, targetRotY = 0, targetRotZ = 0;
+        let rotX = 0, rotY = 0, rotZ = 0;
+        let orbitAngle = 0;
+        const moveState = { up: false, down: false, left: false, right: false };
+        let engineTime = 0;
+        let sceneMode = 'TRIGGER'; 
+
+        // --- CANVAS 2D SYSTEM (For Cosmic Aura) ---
+        const auraCanvas = document.getElementById('aura-canvas');
+        const auraCtx = auraCanvas.getContext('2d', { alpha: false });
+        let auraWidth = window.innerWidth, auraHeight = window.innerHeight;
+        let auraCenterX = auraWidth / 2, auraCenterY = auraHeight / 2;
+        auraCanvas.width = auraWidth; auraCanvas.height = auraHeight;
+
+        const MAX_AURAS = 40;
+        const auras = [];
+
+        class Aura {
+            constructor(note, velocity) {
+                this.active = true;
+                this.age = 0;
+                this.lifespan = 180 + Math.random() * 120; 
+                this.color = auraColors[note % 12];
+                const velocityNorm = velocity / 127;
+                const maxDim = Math.max(auraWidth, auraHeight);
+                this.baseRadius = (maxDim * 0.3) + (Math.random() * maxDim * 0.2) + (velocityNorm * maxDim * 0.4);
+                this.energy = 0.5 + (velocityNorm * 0.5);
+                this.x = auraCenterX + (Math.random() - 0.5) * (auraWidth * 0.6);
+                this.y = auraCenterY + (Math.random() - 0.5) * (auraHeight * 0.6);
+                this.swirlOffset = Math.random() * Math.PI * 2;
+            }
+            update(params) {
+                const fadeMultiplier = 0.5 + (params.fadeSpeed * 2.0);
+                this.age += 1 * fadeMultiplier;
+                if (this.age >= this.lifespan) { this.active = false; return; }
+                const swirlMod = params.swirlSpeed * 3.0;
+                const timeVal = Date.now() * 0.001;
+                const turbX = (Math.random() - 0.5) * params.turbulence * 20.0;
+                const turbY = (Math.random() - 0.5) * params.turbulence * 20.0;
+                this.x += Math.cos(timeVal * swirlMod + this.swirlOffset) * 2.5 + turbX;
+                this.y += Math.sin(timeVal * swirlMod + this.swirlOffset) * 2.5 + turbY;
+                this.baseRadius += 1.0;
+            }
+            draw(ctx, params) {
+                if (!this.active) return;
+                const lifeRatio = this.age / this.lifespan;
+                let opacity = 0;
+                if (lifeRatio < 0.15) opacity = lifeRatio / 0.15;
+                else if (lifeRatio > 0.5) opacity = 1.0 - ((lifeRatio - 0.5) / 0.5);
+                else opacity = 1.0;
+
+                opacity *= this.energy * (0.3 + params.glowIntensity * 1.2);
+                const currentRadius = this.baseRadius * (0.2 + params.sizeMultiplier * 1.8);
+                if (currentRadius <= 0 || opacity <= 0) return;
+
+                const pulseTime = Date.now() * 0.005;
+                const pulseMod = 1.0 + (Math.sin(pulseTime + this.swirlOffset) * params.pulse * 0.5);
+                const finalRadius = currentRadius * pulseMod;
+                const finalOpacity = opacity * (1.0 - (params.pulse * 0.3) + (Math.sin(pulseTime + this.swirlOffset) * params.pulse * 0.3));
+                if (finalRadius <= 0 || finalOpacity <= 0) return;
+
+                const finalHue = (this.color[0] + (params.hueShift * 360)) % 360;
+                const finalSat = Math.min(100, this.color[1] * (params.saturation * 2.0));
+
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, finalRadius);
+                gradient.addColorStop(0, `hsla(${finalHue}, ${finalSat}%, ${this.color[2]}%, ${finalOpacity})`);
+                gradient.addColorStop(0.4, `hsla(${finalHue}, ${finalSat}%, ${this.color[2]}%, ${finalOpacity * 0.5})`);
+                gradient.addColorStop(1, `hsla(${finalHue}, ${finalSat}%, ${this.color[2]}%, 0)`);
+
+                ctx.beginPath(); ctx.fillStyle = gradient; ctx.arc(this.x, this.y, finalRadius, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+
+        function spawnAura(note, velocity) {
+            if (auras.length >= MAX_AURAS) auras.shift();
+            auras.push(new Aura(note, velocity));
+        }
+
+        // --- 2. AUDIO & PITCH REACTIVITY ENGINE ---
+        let audioCtx, analyser, timeDomainDataArray;
+        let isAudioReactive = false;
+        let currentPitchScene = null; let pitchHoldFrames = 0; let lastPitchClass = -1;
+
+        async function initAudioContext() {
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser(); analyser.fftSize = 2048; 
+                timeDomainDataArray = new Float32Array(analyser.fftSize);
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const source = audioCtx.createMediaStreamSource(stream);
+                source.connect(analyser); isAudioReactive = true;
+            } catch(e) {}
+        }
+
+        function autoCorrelate(buf, sampleRate) {
+            let SIZE = buf.length; let rms = 0;
+            for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+            rms = Math.sqrt(rms / SIZE); if (rms < 0.02) return -1; 
+            let r1 = 0, r2 = SIZE - 1, thres = 0.2;
+            for (let i = 0; i < SIZE / 2; i++) if (Math.abs(buf[i]) < thres) { r1 = i; break; }
+            for (let i = 1; i < SIZE / 2; i++) if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
+            buf = buf.slice(r1, r2); SIZE = buf.length;
+            let c = new Array(SIZE).fill(0);
+            for (let i = 0; i < SIZE; i++) for (let j = 0; j < SIZE - i; j++) c[i] = c[i] + buf[j] * buf[j + i];
+            let d = 0; while (c[d] > c[d + 1]) d++;
+            let maxval = -1, maxpos = -1;
+            for (let i = d; i < SIZE; i++) { if (c[i] > maxval) { maxval = c[i]; maxpos = i; } }
+            let T0 = maxpos; let x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1];
+            let a = (x1 + x3 - 2 * x2) / 2; let b = (x3 - x1) / 2;
+            if (a) T0 = T0 - b / (2 * a);
+            return sampleRate / T0;
+        }
+
+        // --- 3. THREE.JS & POST-PROCESSING ---
+        const container = document.getElementById('webgl-container');
+        const scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(0x05000a, 0.002); 
+        const masterGroup = new THREE.Group(); scene.add(masterGroup);
+        
+        const sciFiGroup = new THREE.Group(); const popArtGroup = new THREE.Group(); 
+        const brutalistGroup = new THREE.Group(); const retroGroup = new THREE.Group();
+        masterGroup.add(sciFiGroup, popArtGroup, brutalistGroup, retroGroup);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000); camera.position.z = 15; 
+        const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true }); 
+        renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
+
+        const composer = new EffectComposer(renderer); composer.addPass(new RenderPass(scene, camera));
+        
+        // Pass Pipeline
+        const popArtPass = new ShaderPass(PopArtShader); composer.addPass(popArtPass);
+        const brutalistPass = new ShaderPass(BrutalistShader); composer.addPass(brutalistPass);
+        const retroPass = new ShaderPass(RetroShader); composer.addPass(retroPass);
+        const fractalPass = new ShaderPass(FractalShader); composer.addPass(fractalPass);
+        
+        const rgbShiftPass = new ShaderPass(RGBShiftShader); rgbShiftPass.uniforms['amount'].value = 0.0; composer.addPass(rgbShiftPass);
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.6, 0.4, 0.85); bloomPass.threshold = 0.2; composer.addPass(bloomPass);
+        const glitchPass = new GlitchPass(); glitchPass.enabled = false; composer.addPass(glitchPass);
+        composer.addPass(new OutputPass());
+
+        // --- Lighting ---
+        const dirLight = new THREE.DirectionalLight(0xffffff, 2.5); dirLight.position.set(15, 20, 10); scene.add(dirLight);
+        const ambLight = new THREE.AmbientLight(0x404040, 1.5); scene.add(ambLight);
+
+        // Custom Sunburst Background
+        const sunburstMat = new THREE.ShaderMaterial({
+            uniforms: { time: { value: 0 }, color1: { value: new THREE.Color(0xffea00) }, color2: { value: new THREE.Color(0xff0055) }, rays: { value: 16.0 } },
+            vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+            fragmentShader: `uniform float time; uniform vec3 color1; uniform vec3 color2; uniform float rays; varying vec2 vUv; void main() { vec2 p = vUv - 0.5; float a = atan(p.y, p.x) + time * 0.5; float ray = sin(a * rays); vec3 col = mix(color1, color2, step(0.0, ray)); gl_FragColor = vec4(col, 1.0); }`,
+            depthWrite: false
+        });
+        const sunburstMesh = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), sunburstMat);
+        sunburstMesh.position.z = -50; popArtGroup.add(sunburstMesh);
+
+
+        // --- 4. MATERIALS & SCENES BUILDER ---
+        function createGlowTexture(colorStr) {
+            const canvas = document.createElement('canvas'); canvas.width = 128; canvas.height = 128;
+            const ctx = canvas.getContext('2d'); const grd = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+            grd.addColorStop(0, colorStr); grd.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = grd; ctx.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(canvas);
+        }
+
+        const matWirePink = new THREE.MeshBasicMaterial({ color: 0xff2a55, wireframe: true, transparent: true, blending: THREE.AdditiveBlending });
+        const matWireCyan = new THREE.MeshBasicMaterial({ color: 0x00e5ff, wireframe: true, transparent: true, blending: THREE.AdditiveBlending });
+        const matSolidDark = new THREE.MeshBasicMaterial({ color: 0x0a0011, transparent: true });
+
+        const matPopYellow = new THREE.MeshBasicMaterial({ color: 0xffea00 }); const matPopRed = new THREE.MeshBasicMaterial({ color: 0xff0044 });
+        const matPopBlue = new THREE.MeshBasicMaterial({ color: 0x00ccff }); const matPopWhite = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const matPopBlack = new THREE.MeshBasicMaterial({ color: 0x000000 }); const matPopOutline = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide });
+
+        const matBrutalistLight = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.9, metalness: 0.1, flatShading: true });
+        const matBrutalistDark = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 1.0, metalness: 0.1, flatShading: true });
+
+        // Retro Geometry Materials (Shiny Plastic)
+        const retroColors = [0x273c75, 0xfbc531, 0xe84118, 0x4cd137, 0xe84393, 0x00a8ff, 0x9c88ff];
+        function getRetroMat(idx) {
+            return new THREE.MeshPhysicalMaterial({ color: retroColors[idx % retroColors.length], roughness: 0.3, metalness: 0.1, clearcoat: 0.8, clearcoatRoughness: 0.2 });
+        }
+
+        function addComicOutline(mesh, thickness = 1.08) {
+            const outline = new THREE.Mesh(mesh.geometry, matPopOutline); outline.scale.multiplyScalar(thickness); outline.userData.isOutline = true; mesh.add(outline);
+        }
+
+        const sceneRefs = { scifi: {}, popart: {}, brutalist: {}, retro: {} };
+        function createGroup(key, dict, parent) { const group = new THREE.Group(); group.visible = false; parent.add(group); dict[key] = group; return group; }
+
+        // --- RESTORED SCI-FI SCENES (A-Y) ---
+        const sfA = createGroup('a', sceneRefs.scifi, sciFiGroup); sfA.add(new THREE.Mesh(new THREE.SphereGeometry(8, 32, 32), matSolidDark), new THREE.Mesh(new THREE.IcosahedronGeometry(10, 2), matWirePink)); sfA.userData.anim = (t) => { sfA.children[1].rotation.set(t*0.1, t*0.2, 0); };
+        const sfB = createGroup('b', sceneRefs.scifi, sciFiGroup); for(let i=0; i<8; i++) { const r = new THREE.Mesh(new THREE.TorusGeometry(12, 0.2, 8, 64), i%2===0 ? matWireCyan : matWirePink); sfB.add(r); } sfB.userData.anim = (t) => { sfB.children.forEach((r, i) => { r.rotation.x = t*(0.2+i*0.05); r.rotation.y = t*(0.3-i*0.02); }); };
+        const sfC = createGroup('c', sceneRefs.scifi, sciFiGroup); for(let i=0; i<20; i++) { const r = new THREE.Mesh(new THREE.RingGeometry(20, 20.5, 32), (i%2===0)?matWirePink:matWireCyan); r.position.z = -i*15; sfC.add(r); } sfC.userData.anim = (t) => { sfC.rotation.z = t*0.2; sfC.children.forEach(r => { r.position.z += 1; if(r.position.z > 20) r.position.z = -280; }); };
+        const sfD = createGroup('d', sceneRefs.scifi, sciFiGroup); for(let i=0; i<5; i++) { const m = new THREE.Mesh(new THREE.TorusGeometry(15+i*3, 0.1, 8, 100), matWirePink); m.rotation.x = Math.PI/2; sfD.add(m); } sfD.userData.anim = (t) => { sfD.children.forEach((r, i) => { r.rotation.x = Math.PI/2 + Math.sin(t+i)*0.2; r.rotation.y = Math.cos(t*0.5+i)*0.2; }); };
+        const sfE = createGroup('e', sceneRefs.scifi, sciFiGroup); const starPos = new Float32Array(3000); for(let i=0; i<3000; i++) starPos[i] = (Math.random()-0.5)*200; const starGeo = new THREE.BufferGeometry(); starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3)); sfE.add(new THREE.Points(starGeo, new THREE.PointsMaterial({color:0xffffff, size:0.5, map:createGlowTexture('rgba(0, 229, 255, 1)'), transparent:true, blending:THREE.AdditiveBlending, depthWrite:false}))); sfE.userData.anim = (t) => { const p = sfE.children[0].geometry.attributes.position.array; for(let i=2; i<3000; i+=3) { p[i]+=2; if(p[i]>100) p[i]=-100; } sfE.children[0].geometry.attributes.position.needsUpdate = true; };
+        const sfF = createGroup('f', sceneRefs.scifi, sciFiGroup); sfF.add(new THREE.Mesh(new THREE.IcosahedronGeometry(10, 1), matWireCyan), new THREE.Mesh(new THREE.OctahedronGeometry(14, 0), matWirePink), new THREE.Mesh(new THREE.TetrahedronGeometry(18, 1), matWireCyan)); sfF.userData.anim = (t) => { sfF.children[0].rotation.set(t*0.4, t*0.3, 0); sfF.children[1].rotation.set(-t*0.2, 0, t*0.5); sfF.children[2].rotation.set(-t*0.3, 0, -t*0.2); };
+        const sfG = createGroup('g', sceneRefs.scifi, sciFiGroup); for(let i=0; i<64; i++) { const bar = new THREE.Mesh(new THREE.BoxGeometry(0.2, 5, 0.2), matWireCyan); const a = (i/64)*Math.PI*2; bar.position.set(Math.cos(a)*12, Math.sin(a)*12, 0); bar.rotation.z = a + Math.PI/2; sfG.add(bar); } sfG.userData.anim = (t) => { sfG.rotation.z = t * 0.1; sfG.children.forEach((bar, i) => { const s = 1 + Math.sin(t*5+i)*2; bar.scale.y = s; const a = (i/64)*Math.PI*2; bar.position.set(Math.cos(a)*(12+s*0.5), Math.sin(a)*(12+s*0.5), 0); }); };
+        const sfH = createGroup('h', sceneRefs.scifi, sciFiGroup); sfH.add(new THREE.Mesh(new THREE.OctahedronGeometry(12, 0), matWireCyan), new THREE.Mesh(new THREE.OctahedronGeometry(11.5, 0), matSolidDark)); sfH.userData.anim = (t) => { sfH.children[0].rotation.y = t*0.4; sfH.children[1].rotation.y = t*0.4; sfH.position.y = Math.sin(t)*2; };
+        const sfI = createGroup('i', sceneRefs.scifi, sciFiGroup); sfI.add(new THREE.Mesh(new THREE.TorusKnotGeometry(10, 3, 100, 16), matWirePink)); sfI.userData.anim = (t) => { sfI.children[0].rotation.set(t*0.2, t*0.5, 0); };
+        const sfJ = createGroup('j', sceneRefs.scifi, sciFiGroup); const rainPos = new Float32Array(1500); for(let i=0; i<1500; i++) rainPos[i] = (Math.random()-0.5)*100; const rainGeo = new THREE.BufferGeometry(); rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPos, 3)); sfJ.add(new THREE.Points(rainGeo, new THREE.PointsMaterial({color: 0x00ffaa, size: 0.5}))); sfJ.userData.anim = (t) => { const p = sfJ.children[0].geometry.attributes.position.array; for(let i=1; i<1500*3; i+=3) { p[i]-=1; if(p[i]<-50) p[i]=50; } sfJ.children[0].geometry.attributes.position.needsUpdate = true; };
+        const sfK = createGroup('k', sceneRefs.scifi, sciFiGroup); sfK.add(new THREE.Mesh(new THREE.IcosahedronGeometry(12, 3), matWireCyan)); sfK.userData.anim = (t) => { sfK.children[0].rotation.set(t*0.1, 0, t*0.2); };
+        const sfL = createGroup('l', sceneRefs.scifi, sciFiGroup); for(let i=0; i<4; i++) { const m = new THREE.Mesh(new THREE.TetrahedronGeometry(8, 0), i%2===0?matWirePink:matWireCyan); m.position.set((Math.random()-0.5)*10, (Math.random()-0.5)*10, (Math.random()-0.5)*10); sfL.add(m); } sfL.userData.anim = (t) => { sfL.children.forEach((c, i) => c.rotation.set(t*(i+1)*0.1, t*0.2, 0)); };
+        const sfM = createGroup('m', sceneRefs.scifi, sciFiGroup); const gh1 = new THREE.GridHelper(200, 40, 0x00e5ff, 0xff2a55); gh1.position.y = -10; const gh2 = new THREE.GridHelper(200, 40, 0x00e5ff, 0xff2a55); gh2.position.y = 10; sfM.add(gh1, gh2); sfM.userData.anim = (t) => { sfM.children.forEach(c => c.position.z = (t*10)%40); };
+        const sfN = createGroup('n', sceneRefs.scifi, sciFiGroup); const vortPos = new Float32Array(3000); for(let i=0; i<1000; i++) { let angle = Math.random() * Math.PI * 2; let radius = 5 + Math.random() * 15; vortPos[i*3] = Math.cos(angle) * radius; vortPos[i*3+1] = (Math.random()-0.5) * 60; vortPos[i*3+2] = Math.sin(angle) * radius; } const vortGeo = new THREE.BufferGeometry(); vortGeo.setAttribute('position', new THREE.BufferAttribute(vortPos, 3)); sfN.add(new THREE.Points(vortGeo, new THREE.PointsMaterial({color: 0xff2a55, size: 0.4}))); sfN.userData.anim = (t) => { sfN.rotation.y = t; };
+        const sfO = createGroup('o', sceneRefs.scifi, sciFiGroup); for(let i=0; i<30; i++) { const rung = new THREE.Mesh(new THREE.BoxGeometry(10, 0.5, 0.5), matWireCyan); rung.position.y = (i - 15) * 1.5; rung.rotation.y = i * 0.3; sfO.add(rung); } sfO.userData.anim = (t) => { sfO.rotation.y = t*0.5; sfO.position.y = Math.sin(t)*5; };
+        const sfP = createGroup('p', sceneRefs.scifi, sciFiGroup); sfP.add(new THREE.Mesh(new THREE.SphereGeometry(15, 16, 16), matWirePink), new THREE.Mesh(new THREE.SphereGeometry(12, 16, 16), matWireCyan)); sfP.userData.anim = (t) => { sfP.children[0].rotation.x = t; sfP.children[0].scale.setScalar(1+Math.sin(t*3)*0.2); sfP.children[1].rotation.y = -t; sfP.children[1].scale.setScalar(1+Math.cos(t*2)*0.2); };
+        const sfQ = createGroup('q', sceneRefs.scifi, sciFiGroup); for(let i=0; i<40; i++) { const h = 5 + Math.random() * 20; const b = new THREE.Mesh(new THREE.BoxGeometry(2, h, 2), matWireCyan); b.position.set((Math.random()-0.5)*40, h/2 - 15, (Math.random()-0.5)*40); sfQ.add(b); } sfQ.userData.anim = (t) => { sfQ.rotation.y = t * 0.1; };
+        const sfR = createGroup('r', sceneRefs.scifi, sciFiGroup); sfR.add(new THREE.Mesh(new THREE.OctahedronGeometry(12, 1), matWireCyan), new THREE.Mesh(new THREE.OctahedronGeometry(9, 0), matWirePink)); sfR.userData.anim = (t) => { sfR.children[0].rotation.set(t*0.5, t*0.3, 0); sfR.children[1].rotation.set(-t*0.4, -t*0.2, 0); };
+        const sfS = createGroup('s', sceneRefs.scifi, sciFiGroup); const sfS_t1 = new THREE.Mesh(new THREE.TetrahedronGeometry(14, 0), matWirePink); sfS_t1.rotation.x = Math.PI; const sfS_t2 = new THREE.Mesh(new THREE.TetrahedronGeometry(14, 0), matWirePink); sfS_t2.rotation.z = Math.PI/2; sfS.add(new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10), matWireCyan), sfS_t1, sfS_t2); sfS.userData.anim = (t) => { sfS.children[0].rotation.set(t*0.2, t*0.5, 0); sfS.children[1].rotation.y = -t*0.5; sfS.children[2].rotation.z = t*0.5; };
+        const sfT = createGroup('t', sceneRefs.scifi, sciFiGroup); sfT.add(new THREE.Mesh(new THREE.BoxGeometry(15, 15, 15), matWireCyan), new THREE.Mesh(new THREE.BoxGeometry(8, 8, 8), matWirePink)); sfT.userData.anim = (t) => { sfT.rotation.set(t*0.3, t*0.4, 0); };
+        const sfU = createGroup('u', sceneRefs.scifi, sciFiGroup); const sfU_r = new THREE.Mesh(new THREE.TorusGeometry(14, 0.2, 16, 64), matWireCyan); sfU_r.rotation.x = Math.PI/2; sfU.add(new THREE.Mesh(new THREE.IcosahedronGeometry(9, 0), matSolidDark), new THREE.Mesh(new THREE.IcosahedronGeometry(11, 1), matWirePink), sfU_r); sfU.userData.anim = (t) => { sfU.children[1].rotation.y = t*0.4; sfU.children[2].rotation.set(Math.PI/2 + Math.sin(t)*0.2, t*0.5, 0); };
+        const sfV = createGroup('v', sceneRefs.scifi, sciFiGroup); for(let i=0; i<20; i++) { sfV.add(new THREE.Mesh(new THREE.TorusGeometry(0.5 + i*0.8, 0.15, 16, 64), i%2===0?matWirePink:matWireCyan)); } sfV.userData.anim = (t) => { sfV.rotation.z = t * -0.2; sfV.children.forEach((r, i) => { r.scale.setScalar(1 + Math.sin(t*3-i*0.4)*0.3); r.rotation.set(Math.sin(t*0.5+i*0.1)*0.3, Math.cos(t*0.5+i*0.1)*0.3, t*(i%2===0?0.5:-0.5)); }); };
+        const sfW = createGroup('w', sceneRefs.scifi, sciFiGroup); for(let x=-1; x<=1; x+=2) { for(let y=-1; y<=1; y+=2) { for(let z=-1; z<=1; z+=2) { const m = new THREE.Mesh(new THREE.OctahedronGeometry(4, 0), matWireCyan); m.position.set(x*6, y*6, z*6); sfW.add(m); } } } sfW.add(new THREE.Mesh(new THREE.OctahedronGeometry(5, 0), matWirePink)); sfW.userData.anim = (t) => { sfW.rotation.set(t*0.2, t*0.3, 0); sfW.children.forEach(c => c.rotation.set(t, t, 0)); };
+        const sfX = createGroup('x', sceneRefs.scifi, sciFiGroup); for(let i=0; i<6; i++) { const petal = new THREE.Mesh(new THREE.TorusGeometry(6, 0.1, 16, 64), matWirePink); petal.position.x = Math.cos((i/6)*Math.PI*2) * 5; petal.position.y = Math.sin((i/6)*Math.PI*2) * 5; sfX.add(petal); } sfX.add(new THREE.Mesh(new THREE.TorusGeometry(5, 0.2, 16, 64), matWireCyan)); sfX.userData.anim = (t) => { sfX.rotation.z = t*0.2; sfX.children.forEach((c, i) => { if(i<6) c.rotation.x = t*0.5; }); };
+        const sfY = createGroup('y', sceneRefs.scifi, sciFiGroup); sfY.add(new THREE.Mesh(new THREE.SphereGeometry(9, 16, 16), matWireCyan), new THREE.Mesh(new THREE.SphereGeometry(10.5, 8, 8), matWirePink), new THREE.Mesh(new THREE.SphereGeometry(12, 4, 4), matWireCyan)); sfY.userData.anim = (t) => { sfY.children[0].rotation.set(t*0.3, t*0.4, 0); sfY.children[1].rotation.set(-t*0.2, 0, t*0.5); sfY.children[2].rotation.y = t*0.6; };
+        
+        // --- RESTORED POP ART SCENES (A-Y) ---
+        const paA = createGroup('a', sceneRefs.popart, popArtGroup); for(let i=0; i<3; i++) { const m = new THREE.Mesh(new THREE.CylinderGeometry(0, 10, 2, 8), i%2===0?matPopYellow:matPopRed); m.rotation.x = Math.PI/2; m.rotation.z = i*1.2; m.scale.set(1, 1, 0.2); addComicOutline(m); paA.add(m); } paA.userData.anim = (t) => { paA.children.forEach((c, i) => { if(!c.userData.isOutline) c.rotation.y = t * (i%2===0?2:-2); }); };
+        const paB = createGroup('b', sceneRefs.popart, popArtGroup); const cTop = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 10, 32), matPopRed); cTop.position.y = 2.5; cTop.scale.y = 0.5; addComicOutline(cTop); const cBot = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 10, 32), matPopWhite); cBot.position.y = -2.5; cBot.scale.y = 0.5; addComicOutline(cBot); paB.add(cTop, cBot); paB.userData.anim = (t) => { paB.rotation.set(0, t, Math.sin(t*2)*0.2); };
+        const paC = createGroup('c', sceneRefs.popart, popArtGroup); const bM = new THREE.Mesh(new THREE.SphereGeometry(7, 32, 32), matPopWhite); bM.scale.set(1.5, 1, 0.5); addComicOutline(bM); const tail = new THREE.Mesh(new THREE.ConeGeometry(2, 6, 4), matPopWhite); tail.position.set(-5, -6, 0); tail.rotation.z = -0.5; addComicOutline(tail); paC.add(bM, tail); paC.userData.anim = (t) => { paC.position.y = Math.sin(t*5); };
+        const paD = createGroup('d', sceneRefs.popart, popArtGroup); const vM = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 0.5, 32), matPopBlack); vM.rotation.x = Math.PI/2; const lM = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 0.6, 32), matPopRed); lM.rotation.x = Math.PI/2; addComicOutline(vM); paD.add(vM, lM); paD.userData.anim = (t) => { paD.rotation.set(Math.PI/2 - 0.2, t*2, 0); };
+        const paE = createGroup('e', sceneRefs.popart, popArtGroup); const lSh = new THREE.Shape(); lSh.moveTo(0, 8); lSh.lineTo(-3, 0); lSh.lineTo(1, 0); lSh.lineTo(-2, -8); lSh.lineTo(4, 2); lSh.lineTo(0, 2); lSh.lineTo(3, 8); const lE = new THREE.Mesh(new THREE.ExtrudeGeometry(lSh, {depth: 2, bevelEnabled: false}), matPopYellow); lE.position.set(-1, 0, -1); addComicOutline(lE); paE.add(lE); paE.userData.anim = (t) => { paE.rotation.y = Math.sin(t*3)*0.5; };
+        const paF = createGroup('f', sceneRefs.popart, popArtGroup); const pT = new THREE.Mesh(new THREE.CapsuleGeometry(3, 3, 4, 16), matPopRed); pT.position.y = 1.5; addComicOutline(pT); const pB = new THREE.Mesh(new THREE.CapsuleGeometry(3, 3, 4, 16), matPopBlue); pB.position.y = -1.5; addComicOutline(pB); paF.add(pT, pB); paF.userData.anim = (t) => { paF.rotation.set(t, t*1.5, 0); };
+        const paG = createGroup('g', sceneRefs.popart, popArtGroup); const sG = new THREE.Mesh(new THREE.OctahedronGeometry(8, 0), matPopYellow); addComicOutline(sG); paG.add(sG); paG.userData.anim = (t) => { paG.rotation.set(t, t, 0); };
+        const paH = createGroup('h', sceneRefs.popart, popArtGroup); const lTp = new THREE.Mesh(new THREE.TorusGeometry(6, 2, 16, 32, Math.PI), matPopRed); addComicOutline(lTp); const lBt = new THREE.Mesh(new THREE.TorusGeometry(6, 2, 16, 32, Math.PI), matPopRed); lBt.rotation.z = Math.PI; lBt.position.y = -2; addComicOutline(lBt); paH.add(lTp, lBt); paH.userData.anim = (t) => { paH.rotation.x = Math.sin(t*4)*0.3; };
+        const paI = createGroup('i', sceneRefs.popart, popArtGroup); const eW = new THREE.Mesh(new THREE.SphereGeometry(6, 32, 32), matPopWhite); addComicOutline(eW); const eB = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 2, 32), matPopBlue); eB.rotation.x = Math.PI/2; eB.position.z = 5.5; const eP = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 2, 32), matPopBlack); eP.rotation.x = Math.PI/2; eP.position.z = 6; paI.add(eW, eB, eP); paI.userData.anim = (t) => { paI.rotation.y = Math.sin(t*2)*0.8; paI.rotation.x = Math.sin(t*3)*0.5; };
+        const paJ = createGroup('j', sceneRefs.popart, popArtGroup); const tvB = new THREE.Mesh(new THREE.BoxGeometry(12, 10, 8), matPopBlue); addComicOutline(tvB); const tvS = new THREE.Mesh(new THREE.BoxGeometry(10, 8, 8.5), matPopWhite); const tA = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 8), matPopBlack); tA.position.set(2, 8, 0); tA.rotation.z = 0.5; paJ.add(tvB, tvS, tA);
+        const paK = createGroup('k', sceneRefs.popart, popArtGroup); for(let i=0; i<3; i++) { const r = new THREE.Mesh(new THREE.TorusGeometry(4+i*3, 1, 16, 64), [matPopYellow, matPopRed, matPopBlue][i]); addComicOutline(r); paK.add(r); } paK.userData.anim = (t) => { paK.children.forEach((c, i) => { c.rotation.x = t; c.rotation.y = t*(i+1)*0.5; }); };
+        const paL = createGroup('l', sceneRefs.popart, popArtGroup); for(let i=0; i<5; i++) { const r = new THREE.Mesh(new THREE.SphereGeometry(4+Math.random()*3, 16, 16), matPopWhite); r.position.set((Math.random()-0.5)*8, (Math.random()-0.5)*8, (Math.random()-0.5)*4); addComicOutline(r); paL.add(r); } paL.userData.anim = (t) => { paL.rotation.z = t*0.5; };
+        const paM = createGroup('m', sceneRefs.popart, popArtGroup); const swM = new THREE.Mesh(new THREE.TorusKnotGeometry(6, 2, 64, 8), matPopYellow); addComicOutline(swM); paM.add(swM); paM.userData.anim = (t) => { paM.children[0].rotation.set(t, t*2, 0); };
+        const paN = createGroup('n', sceneRefs.popart, popArtGroup); const bm = new THREE.Mesh(new THREE.SphereGeometry(6, 32, 32), matPopBlack); const fs = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 4), matPopWhite); fs.position.set(3, 5, 0); fs.rotation.z = -0.5; addComicOutline(fs); paN.add(bm, fs); paN.userData.anim = (t) => { paN.children[1].rotation.x = t*5; paN.position.y = Math.sin(t*10)*0.5; };
+        const paO = createGroup('o', sceneRefs.popart, popArtGroup); const phB = new THREE.Mesh(new THREE.CapsuleGeometry(2, 8, 16, 16), matPopRed); phB.rotation.z = Math.PI/2; addComicOutline(phB); const pe1 = new THREE.Mesh(new THREE.SphereGeometry(3, 16, 16), matPopRed); pe1.position.x = 5; addComicOutline(pe1); const pe2 = new THREE.Mesh(new THREE.SphereGeometry(3, 16, 16), matPopRed); pe2.position.x = -5; addComicOutline(pe2); paO.add(phB, pe1, pe2); paO.userData.anim = (t) => { paO.rotation.set(Math.sin(t*5)*0.2, t, 0); };
+        const paP = createGroup('p', sceneRefs.popart, popArtGroup); const dS = new THREE.Mesh(new THREE.IcosahedronGeometry(7, 2), matPopBlue); addComicOutline(dS); paP.add(dS); paP.userData.anim = (t) => { paP.rotation.set(t, t, 0); };
+        const paQ = createGroup('q', sceneRefs.popart, popArtGroup); const zM = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 4, 12, 4), matPopYellow); addComicOutline(zM); paQ.add(zM); paQ.userData.anim = (t) => { paQ.rotation.z = Math.sin(t*10)*0.2; };
+        const paR = createGroup('r', sceneRefs.popart, popArtGroup); const cR = new THREE.Mesh(new THREE.IcosahedronGeometry(8, 0), matPopRed); addComicOutline(cR); paR.add(cR); paR.userData.anim = (t) => { paR.rotation.set(t*2, t*3, 0); };
+        const paS = createGroup('s', sceneRefs.popart, popArtGroup); const uB = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 2, 32), matPopBlue); addComicOutline(uB); const uT = new THREE.Mesh(new THREE.SphereGeometry(4, 32, 32), matPopYellow); uT.position.y = 2; addComicOutline(uT); paS.add(uB, uT); paS.userData.anim = (t) => { paS.rotation.z = Math.sin(t)*0.2; paS.position.y = Math.sin(t*3)*2; };
+        const paT = createGroup('t', sceneRefs.popart, popArtGroup); const toM = new THREE.Mesh(new THREE.CylinderGeometry(8, 0.5, 15, 16), matPopWhite); addComicOutline(toM); paT.add(toM); paT.userData.anim = (t) => { paT.rotation.y = t*3; paT.position.x = Math.sin(t)*3; };
+        const paU = createGroup('u', sceneRefs.popart, popArtGroup); const sB = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 1, 32), matPopYellow); sB.rotation.x = Math.PI/2; addComicOutline(sB); const sE1 = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1.5, 16), matPopBlack); sE1.rotation.x = Math.PI/2; sE1.position.set(-3, 3, 0); const sE2 = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1.5, 16), matPopBlack); sE2.rotation.x = Math.PI/2; sE2.position.set(3, 3, 0); paU.add(sB, sE1, sE2); paU.userData.anim = (t) => { paU.rotation.set(Math.PI/2 - 0.2, t*2, 0); };
+        const paV = createGroup('v', sceneRefs.popart, popArtGroup); const gB = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 8), matPopRed); addComicOutline(gB); const gN = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 6, 16), matPopYellow); gN.rotation.x = Math.PI/2; gN.position.z = 7; addComicOutline(gN); paV.add(gB, gN); paV.userData.anim = (t) => { paV.rotation.y = Math.sin(t*2)*0.5; paV.position.y = Math.sin(t*5)*0.5; };
+        const paW = createGroup('w', sceneRefs.popart, popArtGroup); const kC = new THREE.Mesh(new THREE.ConeGeometry(6, 12, 16), matPopBlue); addComicOutline(kC); paW.add(kC); paW.userData.anim = (t) => { paW.rotation.set(t, 0, t*2); };
+        const paX = createGroup('x', sceneRefs.popart, popArtGroup); const mX = new THREE.Mesh(new THREE.OctahedronGeometry(7, 0), matPopWhite); mX.scale.y = 1.5; addComicOutline(mX); paX.add(mX); paX.userData.anim = (t) => { paX.rotation.y = t; paX.position.y = Math.sin(t*2); };
+        const paY = createGroup('y', sceneRefs.popart, popArtGroup); const pY = new THREE.Mesh(new THREE.TorusGeometry(8, 2, 16, 64), matPopYellow); pY.rotation.x = Math.PI/2; addComicOutline(pY); paY.add(pY); paY.userData.anim = (t) => { paY.rotation.set(Math.PI/2 + Math.sin(t)*0.3, t, 0); };
+
+        // --- RESTORED BRUTALIST SCENES (A-Y) ---
+        const brA = createGroup('a', sceneRefs.brutalist, brutalistGroup); for(let i=0; i<4; i++) { const s = 6+(i*3); const m = new THREE.Mesh(new THREE.BoxGeometry(s, 1.5, s), matBrutalistLight); m.position.y = i*2.5; brA.add(m); for(let p=0; p<4; p++) { const px = (p%2===0?1:-1)*(s/2 - 1); const pz = (p<2?1:-1)*(s/2 - 1); const pi = new THREE.Mesh(new THREE.BoxGeometry(1, 2.5, 1), matBrutalistDark); pi.position.set(px, i*2.5 - 1.25, pz); brA.add(pi); } } brA.userData.anim = (t) => { brA.rotation.y = t*0.1; };
+        const brB = createGroup('b', sceneRefs.brutalist, brutalistGroup); const b1 = new THREE.Mesh(new THREE.BoxGeometry(14, 10, 4), matBrutalistLight); const b2 = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 2, 32), matBrutalistDark); b2.rotation.x = Math.PI/2; b2.position.z = 2.5; const b3 = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 2.5, 32), matBrutalistLight); b3.rotation.x = Math.PI/2; b3.position.z = 3; brB.add(b1, b2, b3); brB.userData.anim = (t) => { brB.rotation.y = -t*0.1; brB.children[1].rotation.y = t*0.5; };
+        const brC = createGroup('c', sceneRefs.brutalist, brutalistGroup); for(let i=-3; i<=3; i++) { const s = new THREE.Mesh(new THREE.BoxGeometry(14 - Math.abs(i)*2, 1.5, 6), matBrutalistLight); s.position.set(0, i*2, i*1.5); brC.add(s); } brC.userData.anim = (t) => { brC.position.y = Math.sin(t)*1.5; };
+        const brD = createGroup('d', sceneRefs.brutalist, brutalistGroup); const dSlab = new THREE.Mesh(new THREE.BoxGeometry(6, 18, 4), matBrutalistLight); const d1 = new THREE.Mesh(new THREE.BoxGeometry(8, 2, 5), matBrutalistDark); d1.position.y = 4; const d2 = new THREE.Mesh(new THREE.BoxGeometry(8, 2, 5), matBrutalistDark); d2.position.y = -4; brD.add(dSlab, d1, d2); brD.userData.anim = (t) => { brD.rotation.y = t*0.1; };
+        const brE = createGroup('e', sceneRefs.brutalist, brutalistGroup); for(let i=-4; i<=4; i++) { const h = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 1.5, 6), i%2===0?matBrutalistLight:matBrutalistDark); h.position.y = i*1.6; h.rotation.y = i*0.2; brE.add(h); } brE.userData.anim = (t) => { brE.children.forEach((c,i) => c.rotation.y = t*(0.2 + i*0.05)); };
+        const brF = createGroup('f', sceneRefs.brutalist, brutalistGroup); for(let x=-1; x<=1; x++) { for(let y=-1; y<=1; y++) { for(let z=-1; z<=1; z++) { const b = new THREE.Mesh(new THREE.BoxGeometry(2,2,2), matBrutalistLight); b.position.set(x*4, y*4, z*4); brF.add(b); } } } brF.userData.anim = (t) => { brF.rotation.set(t*0.1, t*0.15, 0); };
+        const brG = createGroup('g', sceneRefs.brutalist, brutalistGroup); const g1 = new THREE.Mesh(new THREE.BoxGeometry(4, 16, 4), matBrutalistLight); const g2 = new THREE.Mesh(new THREE.BoxGeometry(12, 4, 4), matBrutalistLight); g2.position.y = 3; brG.add(g1, g2); brG.userData.anim = (t) => { brG.rotation.y = t*0.2; };
+        const brH = createGroup('h', sceneRefs.brutalist, brutalistGroup); brH.add(new THREE.Mesh(new THREE.BoxGeometry(16, 12, 2), matBrutalistLight)); for(let x=-3; x<=3; x++) { for(let y=-2; y<=2; y++) { const w = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 2.5), matBrutalistDark); w.position.set(x*2, y*2, 0); brH.add(w); } } brH.userData.anim = (t) => { brH.rotation.y = Math.sin(t*0.5)*0.5; };
+        const brI = createGroup('i', sceneRefs.brutalist, brutalistGroup); brI.add(new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 16, 16), matBrutalistLight)); for(let j=0; j<8; j++) { const r = new THREE.Mesh(new THREE.TorusGeometry(4.2, 0.5, 4, 16), matBrutalistDark); r.rotation.x = Math.PI/2; r.position.y = -7 + (j*2); brI.add(r); } brI.userData.anim = (t) => { brI.rotation.y = t*0.3; };
+        const brJ = createGroup('j', sceneRefs.brutalist, brutalistGroup); brJ.add(new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10), matBrutalistLight), new THREE.Mesh(new THREE.BoxGeometry(12, 4, 12), matBrutalistDark)); brJ.userData.anim = (t) => { brJ.rotation.y = -t*0.15; brJ.children[1].rotation.y = t*0.3; };
+        const brK = createGroup('k', sceneRefs.brutalist, brutalistGroup); const k1 = new THREE.Mesh(new THREE.BoxGeometry(6, 14, 6), matBrutalistLight); k1.position.set(-2, 0, -2); const k2 = new THREE.Mesh(new THREE.BoxGeometry(6, 10, 6), matBrutalistDark); k2.position.set(3, -2, 2); brK.add(k1, k2); brK.userData.anim = (t) => { brK.rotation.y = t*0.1; brK.children[0].position.y = Math.sin(t)*2; brK.children[1].position.y = -2 + Math.cos(t)*2; };
+        const brL = createGroup('l', sceneRefs.brutalist, brutalistGroup); for(let i=0; i<5; i++) { const z = new THREE.Mesh(new THREE.BoxGeometry(14-i*2.5, 2, 14-i*2.5), matBrutalistLight); z.position.y = i*2 - 4; brL.add(z); } brL.userData.anim = (t) => { brL.rotation.y = t*0.2; };
+        const brM = createGroup('m', sceneRefs.brutalist, brutalistGroup); const mR = new THREE.Mesh(new THREE.BoxGeometry(16, 1, 10), matBrutalistLight); mR.position.y = 4; const mB = new THREE.Mesh(new THREE.BoxGeometry(16, 1, 10), matBrutalistLight); mB.position.y = -4; brM.add(mR, mB); for(let x=-1; x<=1; x++) { for(let z=-1; z<=1; z++) { const p = new THREE.Mesh(new THREE.BoxGeometry(1.5, 8, 1.5), matBrutalistDark); p.position.set(x*6, 0, z*3); brM.add(p); } } brM.userData.anim = (t) => { brM.rotation.y = t*0.1; };
+        const brN = createGroup('n', sceneRefs.brutalist, brutalistGroup); brN.add(new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 10, 16), matBrutalistLight)); for(let i=0; i<4; i++) { const b = new THREE.Mesh(new THREE.BoxGeometry(14, 2, 2), matBrutalistDark); b.rotation.y = (i*Math.PI)/4; brN.add(b); } brN.userData.anim = (t) => { brN.rotation.x = Math.PI/4; brN.children.forEach((c,i) => { if(i>0) c.rotation.y = (i*Math.PI/4) + t; }); };
+        const brO = createGroup('o', sceneRefs.brutalist, brutalistGroup); for(let i=0; i<15; i++) { const b = new THREE.Mesh(new THREE.BoxGeometry(3, 2, 3), i%3===0?matBrutalistDark:matBrutalistLight); b.position.set((Math.random()-0.5)*10, (Math.random()-0.5)*10, 0); brO.add(b); } brO.userData.anim = (t) => { brO.rotation.y = t*0.1; };
+        const brP = createGroup('p', sceneRefs.brutalist, brutalistGroup); for(let i=-2; i<=2; i++) { const o = new THREE.Mesh(new THREE.BoxGeometry(2, 12 - Math.abs(i)*2, 2), matBrutalistLight); o.position.x = i*3; brP.add(o); } brP.userData.anim = (t) => { brP.rotation.y = t*0.2; brP.children.forEach((c,i) => c.position.y = Math.sin(t + i)*2); };
+        const brQ = createGroup('q', sceneRefs.brutalist, brutalistGroup); const qC = new THREE.Mesh(new THREE.BoxGeometry(4, 14, 4), matBrutalistDark); const qW1 = new THREE.Mesh(new THREE.BoxGeometry(12, 2, 4), matBrutalistLight); qW1.position.set(-4, 3, 0); const qW2 = new THREE.Mesh(new THREE.BoxGeometry(12, 2, 4), matBrutalistLight); qW2.position.set(4, -1, 0); brQ.add(qC, qW1, qW2); brQ.userData.anim = (t) => { brQ.rotation.y = t*0.1; };
+        const brR = createGroup('r', sceneRefs.brutalist, brutalistGroup); brR.add(new THREE.Mesh(new THREE.CylinderGeometry(7, 8, 8, 8), matBrutalistLight), new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 12, 8), matBrutalistDark)); brR.userData.anim = (t) => { brR.rotation.x = t*0.2; brR.rotation.y = t*0.3; };
+        const brS = createGroup('s', sceneRefs.brutalist, brutalistGroup); brS.add(new THREE.Mesh(new THREE.IcosahedronGeometry(7, 2), matBrutalistLight), new THREE.Mesh(new THREE.CylinderGeometry(8.5, 8.5, 4, 16), matBrutalistDark)); brS.userData.anim = (t) => { brS.children[0].rotation.y = t*0.2; brS.children[1].rotation.x = t*0.5; };
+        const brT = createGroup('t', sceneRefs.brutalist, brutalistGroup); brT.add(new THREE.Mesh(new THREE.BoxGeometry(6, 12, 6), matBrutalistLight)); for(let i=0; i<4; i++) { const b = new THREE.Mesh(new THREE.BoxGeometry(2, 10, 2), matBrutalistDark); b.position.set(Math.cos(i*Math.PI/2)*4, -2, Math.sin(i*Math.PI/2)*4); b.lookAt(0, 5, 0); brT.add(b); } brT.userData.anim = (t) => { brT.rotation.y = t*0.1; };
+        const brU = createGroup('u', sceneRefs.brutalist, brutalistGroup); brU.add(new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 14, 32), matBrutalistLight)); for(let i=0; i<12; i++) { const r = new THREE.Mesh(new THREE.BoxGeometry(1, 14.5, 1.5), matBrutalistDark); r.position.set(Math.cos(i*Math.PI/6)*5, 0, Math.sin(i*Math.PI/6)*5); r.rotation.y = -i*Math.PI/6; brU.add(r); } brU.userData.anim = (t) => { brU.rotation.y = t*0.2; };
+        const brV = createGroup('v', sceneRefs.brutalist, brutalistGroup); [[0,0],[1,0],[0,1],[-1,0],[0,-1]].forEach((p, i) => { const b = new THREE.Mesh(new THREE.BoxGeometry(3.5, 3.5, 3.5), i%2===0?matBrutalistLight:matBrutalistDark); b.position.set(p[0]*3.6, p[1]*3.6, (i%3)*2); brV.add(b); }); brV.userData.anim = (t) => { brV.rotation.set(t*0.1, t*0.2, 0); };
+        const brW = createGroup('w', sceneRefs.brutalist, brutalistGroup); brW.add(new THREE.Mesh(new THREE.BoxGeometry(12, 12, 4), matBrutalistLight), new THREE.Mesh(new THREE.BoxGeometry(8, 8, 4.5), matBrutalistDark)); brW.userData.anim = (t) => { brW.rotation.y = t*0.1; brW.children[1].rotation.z = t*0.5; };
+        const brX = createGroup('x', sceneRefs.brutalist, brutalistGroup); const xC = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 4, 32), matBrutalistLight); xC.rotation.x = Math.PI/2; brX.add(xC, new THREE.Mesh(new THREE.BoxGeometry(6, 6, 4.5), matBrutalistDark)); brX.userData.anim = (t) => { brX.rotation.y = t*0.2; brX.children[1].rotation.z = -t*0.5; };
+        const brY = createGroup('y', sceneRefs.brutalist, brutalistGroup); const y1 = new THREE.Mesh(new THREE.BoxGeometry(2, 12, 2), matBrutalistLight); y1.position.x = -6; const y2 = new THREE.Mesh(new THREE.BoxGeometry(2, 12, 2), matBrutalistLight); y2.position.x = 6; const y3 = new THREE.Mesh(new THREE.BoxGeometry(14, 2, 2), matBrutalistDark); y3.position.y = 2; brY.add(y1, y2, y3); brY.userData.anim = (t) => { brY.rotation.y = t*0.1; };
+
+        // --- NEW RETRO GEOMETRY SCENES (A-Y) ---
+        const rtA = createGroup('a', sceneRefs.retro, retroGroup); const archP = new THREE.Mesh(new THREE.TorusGeometry(5, 2, 16, 64, Math.PI), getRetroMat(0)); const archC = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 8, 32), getRetroMat(1)); archC.position.set(5, -4, 0); const archC2 = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 8, 32), getRetroMat(1)); archC2.position.set(-5, -4, 0); rtA.add(archP, archC, archC2); rtA.userData.anim = (t) => { rtA.rotation.y = t*0.2; };
+        const rtB = createGroup('b', sceneRefs.retro, retroGroup); for(let i=0; i<3; i++) { const r = new THREE.Mesh(new THREE.TorusGeometry(3 + i*3, 1.5, 16, 64, Math.PI), getRetroMat(i)); r.rotation.z = i%2==0 ? 0 : Math.PI; r.position.y = i%2==0 ? -2 : 2; rtB.add(r); } rtB.userData.anim = (t) => { rtB.rotation.z = t*0.5; };
+        const rtC = createGroup('c', sceneRefs.retro, retroGroup); for(let x=-1; x<=1; x++) { for(let y=-1; y<=1; y++) { const bx = new THREE.Mesh(new THREE.BoxGeometry(4,4,4), getRetroMat((x+y+5)%7)); bx.position.set(x*4.2, y*4.2, 0); rtC.add(bx); } } rtC.userData.anim = (t) => { rtC.rotation.set(t*0.2, t*0.3, 0); };
+        const rtD = createGroup('d', sceneRefs.retro, retroGroup); const flC = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 2, 32), getRetroMat(1)); flC.rotation.x = Math.PI/2; rtD.add(flC); for(let i=0; i<5; i++) { const pt = new THREE.Mesh(new THREE.SphereGeometry(3, 32, 32), getRetroMat(3)); pt.position.set(Math.cos(i*Math.PI*2/5)*5, Math.sin(i*Math.PI*2/5)*5, 0); rtD.add(pt); } rtD.userData.anim = (t) => { rtD.rotation.z = -t; };
+        const rtE = createGroup('e', sceneRefs.retro, retroGroup); const sbC = new THREE.Mesh(new THREE.SphereGeometry(3, 32, 32), getRetroMat(4)); rtE.add(sbC); for(let i=0; i<12; i++) { const ray = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 10), getRetroMat(0)); ray.rotation.z = i*Math.PI*2/12; ray.position.set(Math.cos(i*Math.PI*2/12)*5, Math.sin(i*Math.PI*2/12)*5, 0); rtE.add(ray); } rtE.userData.anim = (t) => { rtE.rotation.z = t*0.5; };
+        const rtF = createGroup('f', sceneRefs.retro, retroGroup); class CustomSinCurve extends THREE.Curve { constructor(scale = 1) { super(); this.scale = scale; } getPoint(t, optionalTarget = new THREE.Vector3()) { return optionalTarget.set( t * 20 - 10, Math.sin(t * Math.PI * 4) * 4, 0 ).multiplyScalar(this.scale); } } const path = new CustomSinCurve(1); const sqGeo = new THREE.TubeGeometry(path, 64, 2, 16, false); rtF.add(new THREE.Mesh(sqGeo, getRetroMat(2))); rtF.userData.anim = (t) => { rtF.rotation.x = t*2; };
+        const rtG = createGroup('g', sceneRefs.retro, retroGroup); const eyeB = new THREE.Mesh(new THREE.SphereGeometry(7, 32, 32), getRetroMat(5)); eyeB.scale.set(1, 0.5, 0.3); const eyeP = new THREE.Mesh(new THREE.SphereGeometry(3, 32, 32), getRetroMat(6)); eyeP.position.z = 2; rtG.add(eyeB, eyeP); rtG.userData.anim = (t) => { rtG.rotation.y = Math.sin(t)*0.5; };
+        const rtH = createGroup('h', sceneRefs.retro, retroGroup); rtH.add(new THREE.Mesh(new THREE.CapsuleGeometry(4, 10, 16, 32), getRetroMat(1))); rtH.userData.anim = (t) => { rtH.rotation.set(t, t*0.5, 0); };
+        const rtI = createGroup('i', sceneRefs.retro, retroGroup); const hg1 = new THREE.Mesh(new THREE.ConeGeometry(5, 10, 32), getRetroMat(2)); hg1.position.y = 5; const hg2 = new THREE.Mesh(new THREE.ConeGeometry(5, 10, 32), getRetroMat(3)); hg2.position.y = -5; hg2.rotation.x = Math.PI; rtI.add(hg1, hg2); rtI.userData.anim = (t) => { rtI.rotation.z = t; };
+        const rtJ = createGroup('j', sceneRefs.retro, retroGroup); const st1 = new THREE.Mesh(new THREE.CylinderGeometry(0, 4, 12, 4), getRetroMat(0)); const st2 = new THREE.Mesh(new THREE.CylinderGeometry(0, 4, 12, 4), getRetroMat(0)); st2.rotation.x = Math.PI; rtJ.add(st1, st2); rtJ.userData.anim = (t) => { rtJ.rotation.y = t*2; };
+        const rtK = createGroup('k', sceneRefs.retro, retroGroup); for(let i=0; i<4; i++) { const ax = new THREE.Mesh(new THREE.CapsuleGeometry(1.5, 12, 16, 16), getRetroMat(4)); ax.rotation.z = i*Math.PI/4; rtK.add(ax); } rtK.userData.anim = (t) => { rtK.rotation.z = -t; };
+        const rtL = createGroup('l', sceneRefs.retro, retroGroup); const sc1 = new THREE.Mesh(new THREE.BoxGeometry(12, 4, 4), getRetroMat(2)); const sc2 = new THREE.Mesh(new THREE.BoxGeometry(4, 12, 4), getRetroMat(2)); rtL.add(sc1, sc2); rtL.userData.anim = (t) => { rtL.rotation.set(t*0.5, t*0.5, 0); };
+        const rtM = createGroup('m', sceneRefs.retro, retroGroup); const sp1 = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 4, 32, 1, false, 0, Math.PI), getRetroMat(1)); sp1.position.set(-2.5, 0, 0); const sp2 = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 4, 32, 1, false, 0, Math.PI), getRetroMat(3)); sp2.rotation.y = Math.PI; sp2.position.set(2.5, 0, 0); rtM.add(sp1, sp2); rtM.userData.anim = (t) => { rtM.rotation.x = t; };
+        const rtN = createGroup('n', sceneRefs.retro, retroGroup); for(let i=0; i<3; i++) { const stp = new THREE.Mesh(new THREE.BoxGeometry(12 - i*4, 4, 4), getRetroMat(i)); stp.position.set(i*2, i*4 - 4, 0); rtN.add(stp); } rtN.userData.anim = (t) => { rtN.rotation.y = Math.sin(t)*0.5; };
+        const rtO = createGroup('o', sceneRefs.retro, retroGroup); for(let i=0; i<3; i++) { const wv = new THREE.Mesh(new THREE.TorusGeometry(4, 1.5, 16, 32, Math.PI), getRetroMat(6)); wv.position.x = (i-1)*8; wv.rotation.z = i%2==0 ? 0 : Math.PI; rtO.add(wv); } rtO.userData.anim = (t) => { rtO.position.y = Math.sin(t*3)*2; };
+        const rtP = createGroup('p', sceneRefs.retro, retroGroup); const ir1 = new THREE.Mesh(new THREE.TorusGeometry(6, 2, 16, 64), getRetroMat(0)); ir1.position.x = -3; const ir2 = new THREE.Mesh(new THREE.TorusGeometry(6, 2, 16, 64), getRetroMat(1)); ir2.position.x = 3; ir2.rotation.x = Math.PI/2; rtP.add(ir1, ir2); rtP.userData.anim = (t) => { rtP.rotation.y = t; };
+        const rtQ = createGroup('q', sceneRefs.retro, retroGroup); for(let i=0; i<3; i++) { const chv = new THREE.Mesh(new THREE.CylinderGeometry(0, 6, 4, 3), getRetroMat(2)); chv.rotation.x = Math.PI/2; chv.position.y = (i-1)*5; rtQ.add(chv); } rtQ.userData.anim = (t) => { rtQ.rotation.z = t; };
+        const rtR = createGroup('r', sceneRefs.retro, retroGroup); const hShape = new THREE.Shape(); hShape.moveTo(0, 2); hShape.bezierCurveTo(0, 2, 0, 0, -2, 0); hShape.bezierCurveTo(-5, 0, -5, 3.5, -5, 3.5); hShape.bezierCurveTo(-5, 5.5, -3.5, 7.7, 0, 9.5); hShape.bezierCurveTo(3.5, 7.7, 5, 5.5, 5, 3.5); hShape.bezierCurveTo(5, 3.5, 5, 0, 2, 0); hShape.bezierCurveTo(0, 0, 0, 2, 0, 2); const hExt = new THREE.ExtrudeGeometry(hShape, {depth: 2, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 0.5, bevelThickness: 0.5}); const hM = new THREE.Mesh(hExt, getRetroMat(4)); hM.rotation.z = Math.PI; hM.position.set(0, 4, -1); rtR.add(hM); rtR.userData.anim = (t) => { rtR.rotation.y = t; };
+        const rtS = createGroup('s', sceneRefs.retro, retroGroup); const dia = new THREE.Mesh(new THREE.OctahedronGeometry(6, 0), getRetroMat(5)); dia.scale.y = 1.5; rtS.add(dia); rtS.userData.anim = (t) => { rtS.rotation.set(t, t, 0); };
+        const rtT = createGroup('t', sceneRefs.retro, retroGroup); const mo1 = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, 2, 32), getRetroMat(1)); const mo2 = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 3, 32), getRetroMat(5)); mo2.position.set(2, 0, 0); mo1.rotation.x = Math.PI/2; mo2.rotation.x = Math.PI/2; rtT.add(mo1); rtT.userData.anim = (t) => { rtT.rotation.z = t; };
+        const rtU = createGroup('u', sceneRefs.retro, retroGroup); const pl1 = new THREE.Mesh(new THREE.BoxGeometry(6, 2, 2), getRetroMat(0)); const pl2 = new THREE.Mesh(new THREE.BoxGeometry(2, 6, 2), getRetroMat(0)); const min = new THREE.Mesh(new THREE.BoxGeometry(6, 2, 2), getRetroMat(2)); pl1.position.y = 4; pl2.position.y = 4; min.position.y = -4; rtU.add(pl1, pl2, min); rtU.userData.anim = (t) => { rtU.rotation.y = t; };
+        const rtV = createGroup('v', sceneRefs.retro, retroGroup); for(let i=0; i<3; i++) { const trg = new THREE.Mesh(new THREE.CylinderGeometry(8 - i*3, 8 - i*3, 2, 32), getRetroMat(i)); trg.rotation.x = Math.PI/2; trg.position.z = i; rtV.add(trg); } rtV.userData.anim = (t) => { rtV.rotation.y = Math.sin(t)*0.5; };
+        const rtW = createGroup('w', sceneRefs.retro, retroGroup); rtW.add(new THREE.Mesh(new THREE.TorusKnotGeometry(5, 1.5, 100, 16), getRetroMat(3))); rtW.userData.anim = (t) => { rtW.rotation.x = t; };
+        const rtX = createGroup('x', sceneRefs.retro, retroGroup); for(let i=0; i<3; i++) { const drp = new THREE.Mesh(new THREE.SphereGeometry(3, 32, 32), getRetroMat(i+1)); drp.scale.y = 1.5; drp.position.set((i-1)*6, 0, 0); rtX.add(drp); } rtX.userData.anim = (t) => { rtX.children.forEach((c,i) => c.position.y = Math.sin(t*3 + i)*2); };
+        const rtY = createGroup('y', sceneRefs.retro, retroGroup); const fc = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 1, 32), getRetroMat(1)); fc.rotation.x = Math.PI/2; const fe1 = new THREE.Mesh(new THREE.SphereGeometry(1.5, 16, 16), getRetroMat(0)); fe1.position.set(-3, 2, 1); const fe2 = new THREE.Mesh(new THREE.SphereGeometry(1.5, 16, 16), getRetroMat(0)); fe2.position.set(3, 2, 1); const fm = new THREE.Mesh(new THREE.BoxGeometry(4, 1, 2), getRetroMat(2)); fm.position.set(0, -3, 1); rtY.add(fc, fe1, fe2, fm); rtY.userData.anim = (t) => { rtY.rotation.set(Math.sin(t)*0.2, Math.sin(t*1.5)*0.2, 0); };
+
+        // FADING PREP FOR ALL WEBGL SCENES
+        function setupFading(refsObj) {
+            Object.values(refsObj).forEach(group => {
+                group.userData.materials = [];
+                group.userData.initialPositions = []; 
+                group.traverse(child => {
+                    if(child.isMesh) group.userData.initialPositions.push({ mesh: child, x: child.position.x, y: child.position.y, z: child.position.z, sx: child.scale.x, sy: child.scale.y, sz: child.scale.z });
+                    if (child.material && !child.material.userData.isOutline) {
+                        child.material = child.material.clone(); child.material.transparent = true;
+                        if (child.material.opacity === undefined) child.material.opacity = 1.0;
+                        child.material.userData.baseOpacity = child.material.opacity;
+                        group.userData.materials.push(child.material);
+                    }
+                });
+            });
+        }
+        Object.values(sceneRefs).forEach(setupFading);
+
+        // --- 7. UI & BANK SWITCHING ---
+        const scenesList = document.getElementById('scenes-list');
+        const effectsList = document.getElementById('effects-list');
+        const hudLayer = document.getElementById('hud-layer');
+        const bankToggleBtn = document.getElementById('bank-toggle-btn');
+        const resetFxBtn = document.getElementById('reset-fx-btn');
+
+        function updateUI() {
+            const currentBank = BANKS[activeBankIdx];
+            scenesList.innerHTML = '';
+            currentBank.scenes.forEach(s => { scenesList.innerHTML += `<li class="effect-item ${s.active ? 'active' : ''}"><div class="effect-item-header"><span class="key-badge">${s.key}</span> ${s.name}</div></li>`; });
+            effectsList.innerHTML = '';
+            currentBank.effects.forEach((e, idx) => {
+                const colorClass = (e.name === 'UNASSIGNED') ? 'opacity: 0.2;' : '';
+                effectsList.innerHTML += `<li class="effect-item ${e.value > 0 ? 'active' : ''}" style="${colorClass}"><div class="effect-item-header"><span class="key-badge">K${idx+1}</span> ${e.name}</div><div class="effect-value-bar" style="width: ${e.value * 100}%;"></div></li>`;
+            });
+        }
+        updateUI();
+
+        function forceSceneState(key, isActive) {
+            const sceneConfig = BANKS[activeBankIdx].scenes.find(s => s.key === key);
+            if(sceneConfig && sceneConfig.active !== isActive) { sceneConfig.active = isActive; updateUI(); }
+        }
+
+        // RESET FX logic
+        function resetKnobs() {
+            const b = BANKS[activeBankIdx];
+            b.effects.forEach(e => {
+                if (e.name === 'UNASSIGNED') {
+                    e.value = 0;
+                } else {
+                    e.value = (activeBankIdx < 4) ? 0 : 0.5;
+                    if (e.name.includes('HUE') || e.name.includes('CHAOS') || e.name.includes('TURBULENCE')) e.value = 0;
+                }
+            });
+            updateUI();
+        }
+
+        function toggleBank() {
+            BANKS[activeBankIdx].scenes.forEach(s => s.active = false); 
+            activeBankIdx = (activeBankIdx + 1) % 6; 
+            
+            const b = BANKS[activeBankIdx];
+            document.body.className = b.class || 'scifi-mode';
+            bankToggleBtn.innerText = `BANK: ${b.name} (PAD 2)`; 
+            bankToggleBtn.style.color = b.color; bankToggleBtn.style.borderColor = b.color;
+            
+            // Light Resets for Brutalist & Retro
+            dirLight.intensity = (activeBankIdx === 2 || activeBankIdx === 3) ? 2.5 : 0; 
+            ambLight.intensity = (activeBankIdx === 2 || activeBankIdx === 3) ? 1.5 : 0;
+
+            resetKnobs(); 
+        }
+
+        bankToggleBtn.addEventListener('click', toggleBank);
+        resetFxBtn.addEventListener('click', resetKnobs);
+        document.getElementById('ui-toggle-btn').addEventListener('click', () => { hudLayer.style.opacity = hudLayer.style.opacity === '0' ? '1' : '0'; });
+        document.getElementById('mode-toggle-btn').addEventListener('click', () => { sceneMode = sceneMode === 'TRIGGER' ? 'LATCH' : 'TRIGGER'; document.getElementById('mode-toggle-btn').innerText = `MODE: ${sceneMode} (PAD 3)`; });
+
+        const ohShitBtn = document.getElementById('oh-shit-btn');
+        ohShitBtn.addEventListener('click', () => {
+            isOhShitMode = !isOhShitMode;
+            ohShitBtn.innerText = `OH SHIT! (${isOhShitMode ? 'ON' : 'OFF'})`;
+            if(isOhShitMode) {
+                ohShitBtn.style.backgroundColor = '#ffea00';
+                ohShitBtn.style.color = '#000';
+            } else {
+                ohShitBtn.style.backgroundColor = 'transparent';
+                ohShitBtn.style.color = '#ffea00';
+            }
+        });
+
+        // --- 8. KEYBOARD & MIDI HANDLING ---
+        function handleSceneKey(key, isDown) {
+            const sceneConfig = BANKS[activeBankIdx].scenes.find(s => s.key === key);
+            if(sceneConfig) {
+                if (isDown) {
+                    if(sceneMode === 'TRIGGER' && !sceneConfig.active) { sceneConfig.active = true; updateUI(); } 
+                    else if (sceneMode === 'LATCH') { sceneConfig.active = !sceneConfig.active; updateUI(); }
+                } else {
+                    if (sceneMode === 'TRIGGER' && sceneConfig.active) { sceneConfig.active = false; updateUI(); }
+                }
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab', 'Escape'].includes(e.code)) e.preventDefault(); 
+            if (e.repeat) return; 
+
+            // Trigger global color flash if scene Z is active
+            triggerBgFlash(e.keyCode || e.key.charCodeAt(0));
+
+            const key = e.key.toLowerCase();
+            if (key === 'escape') resetKnobs(); // Map Escape to Reset
+            if (key === 'shift') { sceneMode = sceneMode === 'TRIGGER' ? 'LATCH' : 'TRIGGER'; document.getElementById('mode-toggle-btn').innerText = `MODE: ${sceneMode} (PAD 3)`; }
+            if (e.code === 'Tab') hudLayer.style.opacity = hudLayer.style.opacity === '0' ? '1' : '0';
+            if (e.code === 'Space') beatScale = 1.5;
+            if (key === 'arrowup') moveState.up = true; if (key === 'arrowdown') moveState.down = true; if (key === 'arrowleft') moveState.left = true; if (key === 'arrowright') moveState.right = true;
+            
+            const sceneIdx = BANKS[activeBankIdx].scenes.findIndex(s => s.key === key);
+            if (sceneIdx !== -1) {
+                if (activeBankIdx === 4) {
+                    spawnAura(36 + sceneIdx, 90 + Math.random() * 37);
+                    beatScale = 1.5;
+                } else if (activeBankIdx === 5) {
+                    const col1 = genColors[sceneIdx % 12];
+                    const col2 = genColors[(sceneIdx + 5) % 12];
+                    fractalPass.uniforms.color1.value.setHSL(col1[0], col1[1], col1[2]);
+                    fractalPass.uniforms.color2.value.setHSL(col2[0], col2[1], col2[2]);
+                    beatScale = 2.0; 
+                }
+            }
+
+            handleSceneKey(key, true);
+            const effectConfig = BANKS[activeBankIdx].effects.find(eff => eff.key === key);
+            if(effectConfig && effectConfig.name !== 'UNASSIGNED') { effectConfig.value = 1.0; updateUI(); }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+            if (key === 'arrowup') moveState.up = false; if (key === 'arrowdown') moveState.down = false; if (key === 'arrowleft') moveState.left = false; if (key === 'arrowright') moveState.right = false;
+            handleSceneKey(key, false);
+            const effectConfig = BANKS[activeBankIdx].effects.find(eff => eff.key === key); if(effectConfig) { effectConfig.value = 0.0; updateUI(); }
+        });
+
+        function setupMidiInput(input) {
+            input.onmidimessage = (msg) => {
+                const [command, data1, data2] = msg.data;
+                const channel = command & 0x0F; 
+                const currentBank = BANKS[activeBankIdx];
+                
+                // CC Handling (Knobs K1-K8)
+                if (command >= 176 && command <= 191) {
+                    let effectIdx = -1;
+                    if (data1 >= 70 && data1 <= 77) effectIdx = data1 - 70; else if (data1 >= 1 && data1 <= 8) effectIdx = data1 - 1;
+                    if (effectIdx !== -1 && currentBank.effects[effectIdx].name !== 'UNASSIGNED') {
+                        currentBank.effects[effectIdx].value = data2 / 127.0; updateUI();
+                    }
+                    return; 
+                }
+
+                const isNoteOn = (command >= 144 && command <= 159) && data2 > 0;
+                const isNoteOff = (command >= 128 && command <= 143) || ((command >= 144 && command <= 159) && data2 === 0);
+
+                let sceneKey = null;
+                let isPad = (channel === 9);
+
+                if (!isNoteOn && !isNoteOff) return;
+
+                if (!isPad) {
+                    let index = data1 - 48; // Base C2
+                    if (data1 < 48) index = data1 - 36; // Octave Down
+                    else if (data1 > 72) index = data1 - 60; // Octave Up
+                    if (index >= 0 && index <= 24) sceneKey = String.fromCharCode(97 + index);
+                }
+
+                if (isNoteOn) { 
+                    triggerBgFlash(data1); // Trigger Global Flash
+                    
+                    if (isPad) {
+                        if (data1 === 36 || data1 === 37 || data1 === 44) beatScale = 1.5;
+                        else if (data1 === 38 || data1 === 39 || data1 === 45) toggleBank(); // Pad 2
+                        else if (data1 === 40 || data1 === 41 || data1 === 46) { // Pad 3
+                            sceneMode = sceneMode === 'TRIGGER' ? 'LATCH' : 'TRIGGER'; 
+                            document.getElementById('mode-toggle-btn').innerText = `MODE: ${sceneMode} (PAD 3)`; 
+                        }
+                        else if (data1 === 42 || data1 === 43 || data1 === 47) { // Pad 4
+                            const hl = document.getElementById('hud-layer');
+                            hl.style.opacity = hl.style.opacity === '0' ? '1' : '0'; 
+                        } 
+                        else if (data1 === 48 || data1 === 49 || data1 === 51) { // Pad 5
+                            resetKnobs();
+                        }
+                        else beatScale = 1.5;
+                    } else {
+                        if (sceneKey) {
+                            const sceneIdx = sceneKey.charCodeAt(0) - 97;
+                            if (activeBankIdx === 4) {
+                                spawnAura(data1, data2);
+                                beatScale = 1.5;
+                            } else if (activeBankIdx === 5) {
+                                const col1 = genColors[sceneIdx % 12];
+                                const col2 = genColors[(sceneIdx + 5) % 12];
+                                fractalPass.uniforms.color1.value.setHSL(col1[0], col1[1], col1[2]);
+                                fractalPass.uniforms.color2.value.setHSL(col2[0], col2[1], col2[2]);
+                                beatScale = 2.0; 
+                            }
+                            handleSceneKey(sceneKey, true);
+                        }
+                    }
+                } else if (isNoteOff) {
+                    if (!isPad && sceneKey) handleSceneKey(sceneKey, false);
+                }
+            };
+        }
+
+        function initMidi() {
+            try {
+                if (navigator.requestMIDIAccess) {
+                    navigator.requestMIDIAccess().then(midiAccess => {
+                        for (let input of midiAccess.inputs.values()) { setupMidiInput(input); }
+                        midiAccess.onstatechange = (e) => { if (e.port.type === 'input' && e.port.state === 'connected') { setupMidiInput(e.port); } };
+                    }).catch(err => { console.log('MIDI ERR: DENIED'); });
+                }
+            } catch(error) {}
+        }
+
+        document.getElementById('initiate-btn').addEventListener('click', () => {
+            const splash = document.getElementById('splash-screen'); splash.style.opacity = '0'; setTimeout(() => { splash.style.display = 'none'; }, 1000);
+            initMidi(); initAudioContext();
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight); composer.setSize(window.innerWidth, window.innerHeight);
+            fractalPass.uniforms.resolution.value.set(window.innerWidth, window.innerHeight);
+            auraWidth = window.innerWidth; auraHeight = window.innerHeight;
+            auraCenterX = auraWidth / 2; auraCenterY = auraHeight / 2;
+            auraCanvas.width = auraWidth; auraCanvas.height = auraHeight;
+        });
+
+        // --- 9. MAIN RENDER LOOP ---
+        const clock = new THREE.Clock();
+
+        function processAudioData() {
+            if (isAudioReactive && analyser) {
+                analyser.getFloatTimeDomainData(timeDomainDataArray);
+                let freq = autoCorrelate(timeDomainDataArray, audioCtx.sampleRate);
+                if (freq !== -1) {
+                    let note = Math.round(12 * (Math.log2(freq / 440)) + 69);
+                    let pitchClass = note % 12; 
+                    if (pitchClass === lastPitchClass) {
+                        pitchHoldFrames++;
+                        if (pitchHoldFrames >= 3) {
+                            let targetSceneKey = String.fromCharCode(97 + pitchClass); 
+                            if (currentPitchScene !== targetSceneKey) {
+                                if (currentPitchScene) forceSceneState(currentPitchScene, false); 
+                                forceSceneState(targetSceneKey, true); 
+                                currentPitchScene = targetSceneKey;
+                                
+                                if (activeBankIdx === 4) {
+                                    spawnAura(note, 100);
+                                    beatScale = 1.5;
+                                } else if (activeBankIdx === 5) {
+                                    const col1 = genColors[pitchClass % 12];
+                                    const col2 = genColors[(pitchClass + 5) % 12];
+                                    fractalPass.uniforms.color1.value.setHSL(col1[0], col1[1], col1[2]);
+                                    fractalPass.uniforms.color2.value.setHSL(col2[0], col2[1], col2[2]);
+                                    beatScale = 2.0; 
+                                }
+                            }
+                        }
+                    } else { lastPitchClass = pitchClass; pitchHoldFrames = 0; }
+                } else {
+                    if (currentPitchScene) { forceSceneState(currentPitchScene, false); currentPitchScene = null; lastPitchClass = -1; }
+                }
+            } 
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            let delta = clock.getDelta();
+            
+            const currentBank = BANKS[activeBankIdx];
+            const eff = currentBank.effects;
+
+            let speedMult = 1.0;
+            if (activeBankIdx === 0) speedMult += (eff[4].value * 9.0);
+            engineTime += delta * speedMult;
+            const t = engineTime;
+
+            if (moveState.left) targetRotY -= 0.03; if (moveState.right) targetRotY += 0.03;
+            if (moveState.up) targetRotX -= 0.03; if (moveState.down) targetRotX += 0.03;
+            targetRotZ *= 0.95;
+
+            rotX += (targetRotX - rotX) * 0.1; rotY += (targetRotY - rotY) * 0.1; rotZ += (targetRotZ - rotZ) * 0.1;
+            masterGroup.rotation.set(rotX, rotY, rotZ);
+
+            processAudioData();
+            beatScale += (1.0 - beatScale) * 0.15;
+            masterGroup.scale.set(beatScale, beatScale, beatScale);
+            
+            let cx = 0, cy = 0, camBaseX = 0, camBaseY = 0, camBaseZ = 15;
+            let currentFov = 75 + (beatScale - 1.0) * 30;
+
+            // Clean WebGL State
+            popArtPass.enabled = false; brutalistPass.enabled = false; retroPass.enabled = false; fractalPass.enabled = false; 
+            rgbShiftPass.uniforms['amount'].value = 0.0;
+            bloomPass.strength = 0; glitchPass.enabled = false; document.body.style.filter = '';
+            scene.background = null; sunburstMesh.visible = false;
+            document.getElementById('scanlines').style.opacity = 0;
+            masterGroup.position.y = 0;
+            auraCanvas.style.display = 'none';
+
+            if (activeBankIdx === 0) { // --- SCI-FI ---
+                sciFiGroup.visible = true; popArtGroup.visible = false; brutalistGroup.visible = false; retroGroup.visible = false;
+                if (eff[0].value > 0) { cx += (Math.random()-0.5) * 10 * eff[0].value; cy += (Math.random()-0.5) * 10 * eff[0].value; }
+                if (eff[4].value > 0) { orbitAngle += delta * (eff[4].value * 2.0); camBaseX = Math.sin(orbitAngle) * 15; camBaseZ = Math.cos(orbitAngle) * 15; } else { orbitAngle = 0; }
+                currentFov += (eff[5].value * 55); 
+                bloomPass.strength = 0.4 + (beatScale - 1.0) * 0.6; glitchPass.enabled = Math.random() < (eff[7].value * 0.8);
+                document.body.style.filter = eff[3].value > 0 ? `invert(${eff[3].value * 100}%) hue-rotate(${eff[3].value * 180}deg)` : '';
+                scene.background = (eff[1].value > 0.05 && (Math.floor(t * (10 + eff[1].value * 30)) % 2 === 0)) ? new THREE.Color().setHSL(0, 0, eff[1].value) : new THREE.Color(0x05000a);
+                document.getElementById('scanlines').style.opacity = 0.3;
+
+            } else if (activeBankIdx === 1) { // --- POP ART ---
+                sciFiGroup.visible = false; popArtGroup.visible = true; brutalistGroup.visible = false; retroGroup.visible = false;
+                popArtPass.enabled = true; popArtPass.uniforms['dotScale'].value = eff[0].value; popArtPass.uniforms['gridSize'].value = 1.0 + Math.floor(eff[1].value * 4); popArtPass.uniforms['paperGrain'].value = eff[5].value;
+                const squash = 1.0 + (Math.sin(t*15) * eff[2].value * 0.5); masterGroup.scale.set(beatScale * (1.0/squash), beatScale * squash, beatScale);
+                sunburstMat.uniforms.color1.value = (eff[3].value > 0 && beatScale > 1.2) ? [new THREE.Color(0xffea00), new THREE.Color(0xff0044), new THREE.Color(0x00ccff)][Math.floor(Math.random()*3)] : new THREE.Color(0xffea00);
+                sunburstMesh.visible = true; sunburstMat.uniforms.time.value = t;
+                if (eff[7].value > 0.05 && (Math.floor(t * (10 + eff[7].value * 30)) % 2 === 0)) scene.background = new THREE.Color(0xffffff);
+
+            } else if (activeBankIdx === 2) { // --- BRUTALIST ---
+                sciFiGroup.visible = false; popArtGroup.visible = false; brutalistGroup.visible = true; retroGroup.visible = false;
+                brutalistPass.enabled = true; brutalistPass.uniforms['kaleidoscope'].value = eff[0].value; brutalistPass.uniforms['contrast'].value = eff[1].value; brutalistPass.uniforms['aspect'].value = camera.aspect;
+                camBaseZ = 18; if (eff[4].value > 0) { orbitAngle += delta * (eff[4].value * 2.0); const phi = Math.PI/2 + Math.sin(orbitAngle * 0.618) * (Math.PI/2.2) * eff[4].value; camBaseX = 18 * Math.sin(phi) * Math.cos(orbitAngle); camBaseY = 18 * Math.cos(phi); camBaseZ = 18 * Math.sin(phi) * Math.sin(orbitAngle); } else { orbitAngle = 0; }
+                currentFov += (eff[5].value * 60); 
+                scene.background = (eff[7].value > 0.05 && (Math.floor(t * (10 + eff[7].value * 30)) % 2 === 0)) ? new THREE.Color(0xffffff) : new THREE.Color(0x0a0a0a);
+                if (scene.background.r > 0.5) { dirLight.intensity = 0; ambLight.intensity = 0; } else { dirLight.intensity = 2.5; ambLight.intensity = 1.5; }
+
+            } else if (activeBankIdx === 3) { // --- RETRO GEOMETRY ---
+                sciFiGroup.visible = false; popArtGroup.visible = false; brutalistGroup.visible = false; retroGroup.visible = true;
+                retroPass.enabled = true; 
+                scene.background = new THREE.Color(0x192a56); 
+                document.getElementById('scanlines').style.opacity = 0.1;
+                
+                retroPass.uniforms.aspect.value = camera.aspect;
+                retroPass.uniforms.gridMult.value = 1.0 + Math.floor(eff[0].value * 5.0); // Grid Multiply
+                if (eff[1].value > 0.1 && (Math.floor(t * 20) % 2 === 0)) { dirLight.intensity = 0; ambLight.intensity = 0; } else { dirLight.intensity = 3; ambLight.intensity = 1; } // Strobe
+                retroPass.uniforms.hueShift.value = eff[2].value; // Hue Cycle
+                if(eff[3].value > 0) { cx += (Math.random()-0.5) * 15 * eff[3].value; cy += (Math.random()-0.5) * 15 * eff[3].value; } // Shake
+                retroPass.uniforms.kaleidoscope.value = eff[4].value; // Kaleidoscope
+                
+                if (eff[5].value > 0) { const snap = Math.floor(t * (1.0 + eff[5].value * 8.0)) * (Math.PI/2); retroGroup.rotation.z = snap; } else { retroGroup.rotation.z = 0; } // Snap Spin
+                retroGroup.scale.z = 1.0 + (eff[6].value * 8.0); // 3D Extrude
+                
+                if (eff[7].value > 0) { const pump = 1.0 + (Math.sin(t * 15) * eff[7].value * 0.5); retroGroup.scale.x = pump; retroGroup.scale.y = pump; } // Kinetic Bounce
+                else { retroGroup.scale.x = 1.0; retroGroup.scale.y = 1.0; }
+
+            } else if (activeBankIdx === 4) { // --- COSMIC AURA (CANVAS 2D) ---
+                sciFiGroup.visible = false; popArtGroup.visible = false; brutalistGroup.visible = false; retroGroup.visible = false;
+                auraCanvas.style.display = 'block';
+                scene.background = null; 
+
+                auraCtx.globalCompositeOperation = 'source-over';
+                const bgGrad = auraCtx.createLinearGradient(0, 0, 0, auraHeight);
+                bgGrad.addColorStop(0, '#020005'); bgGrad.addColorStop(0.5, '#040614'); bgGrad.addColorStop(1, '#000000');
+                auraCtx.fillStyle = bgGrad; auraCtx.fillRect(0, 0, auraWidth, auraHeight);
+                auraCtx.globalCompositeOperation = 'lighter';
+
+                const auraParams = {
+                    swirlSpeed: eff[0].value, sizeMultiplier: eff[1].value, glowIntensity: eff[2].value, fadeSpeed: eff[3].value,
+                    hueShift: eff[4].value, turbulence: eff[5].value, saturation: eff[7].value, pulse: Math.max(0, beatScale - 1.0)
+                };
+
+                for (let i = auras.length - 1; i >= 0; i--) {
+                    auras[i].update(auraParams);
+                    auras[i].draw(auraCtx, auraParams);
+                    if (!auras[i].active) auras.splice(i, 1);
+                }
+
+            } else if (activeBankIdx === 5) { // --- FRACTAL UNIVERSE (WEBGL SHADER) ---
+                sciFiGroup.visible = false; popArtGroup.visible = false; brutalistGroup.visible = false; retroGroup.visible = false;
+                fractalPass.enabled = true;
+                scene.background = new THREE.Color(0x000000); 
+                document.getElementById('scanlines').style.opacity = 0.1;
+                
+                let currentSceneIdx = 0;
+                currentBank.scenes.forEach((s, idx) => { if (s.active) currentSceneIdx = idx; });
+
+                fractalPass.uniforms.time.value = t;
+                fractalPass.uniforms.zoom.value = eff[0].value;
+                fractalPass.uniforms.density.value = eff[1].value;
+                fractalPass.uniforms.glow.value = eff[2].value;
+                fractalPass.uniforms.chaos.value = eff[3].value;
+                fractalPass.uniforms.hueShift.value = eff[4].value;
+                fractalPass.uniforms.rotation.value = eff[5].value;
+                fractalPass.uniforms.symmetry.value = eff[7].value;
+                fractalPass.uniforms.pulse.value = Math.max(0, beatScale - 1.0);
+                fractalPass.uniforms.sceneIndex.value = currentSceneIdx; 
+            }
+
+            // --- DYNAMIC BACKGROUND COLOR FLASH APPLY (SCENE Z Logic) ---
+            if (bgFlashIntensity > 0) {
+                if (activeBankIdx === 0 || activeBankIdx === 2 || activeBankIdx === 3) {
+                    if (!scene.background || !scene.background.isColor) scene.background = new THREE.Color(0x000000);
+                    scene.background.lerp(bgFlashColor, bgFlashIntensity);
+                } else if (activeBankIdx === 1) {
+                    sunburstMat.uniforms.color1.value.lerp(bgFlashColor, bgFlashIntensity);
+                    sunburstMat.uniforms.color2.value.lerp(bgFlashColor, bgFlashIntensity);
+                } else if (activeBankIdx === 4) {
+                    auraCtx.globalCompositeOperation = 'source-over';
+                    auraCtx.fillStyle = `rgba(${Math.floor(bgFlashColor.r*255)}, ${Math.floor(bgFlashColor.g*255)}, ${Math.floor(bgFlashColor.b*255)}, ${bgFlashIntensity * 0.4})`;
+                    auraCtx.fillRect(0, 0, auraWidth, auraHeight);
+                    auraCtx.globalCompositeOperation = 'lighter';
+                }
+                
+                bgFlashIntensity -= delta * 4.0;
+                if (bgFlashIntensity < 0) bgFlashIntensity = 0;
+            }
+
+            if (activeBankIdx === 5) {
+                fractalPass.uniforms.flashColor.value.copy(bgFlashColor);
+                fractalPass.uniforms.flashIntensity.value = bgFlashIntensity;
+            }
+
+            // WebGL specific 3D updates
+            if (activeBankIdx < 4) {
+                camera.position.set(camBaseX + cx, camBaseY - cy, camBaseZ); camera.lookAt(scene.position);
+                camera.fov = currentFov; camera.updateProjectionMatrix();
+
+                currentBank.scenes.forEach((s, idx) => {
+                    const grpDict = [sceneRefs.scifi, sceneRefs.popart, sceneRefs.brutalist, sceneRefs.retro][activeBankIdx];
+                    if(grpDict) {
+                        const group = grpDict[s.key]; if (!group) return;
+                        s.fade += (s.active ? delta * 8.0 : -delta * 8.0); s.fade = Math.max(0.0, Math.min(1.0, s.fade));
+                        if (s.fade > 0) {
+                            group.visible = true;
+                            if(activeBankIdx === 2) { 
+                                const vE = 1.0 + (eff[2].value * 3.0); const hE = 1.0 + (eff[3].value * 3.0);
+                                group.userData.initialPositions.forEach(item => { item.mesh.position.set(item.x*hE, item.y*vE, item.z*hE); item.mesh.scale.set(item.sx*hE, item.sy*vE, item.sz*hE); });
+                            } else if (activeBankIdx === 1) { 
+                                group.scale.setScalar(0.5 + (s.fade * 0.5));
+                            } else if (activeBankIdx === 3) {
+                                // Retro scale fading logic handled globally
+                            } else { 
+                                group.scale.setScalar(0.8 + (s.fade * 0.2)); 
+                            }
+                            
+                            // Apply opacity fades
+                            group.userData.materials.forEach(mat => mat.opacity = mat.userData.baseOpacity * s.fade);
+                        } else {
+                            group.visible = false;
+                        }
+                        
+                        if (group.visible && group.userData.anim) group.userData.anim(t);
+                    }
+                });
+            }
+
+            composer.render();
+        }
+
+        animate();
+    </script>
+</body>
+</html>
