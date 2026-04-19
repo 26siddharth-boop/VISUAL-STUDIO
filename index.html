@@ -261,11 +261,11 @@
         </div>
 
         <div class="mode-controls" id="mode-controls-container">
-            <button id="bank-toggle-btn" class="top-btn" style="border-color: #00e5ff; color: #00e5ff; background: rgba(0,0,0,0.8);">BANK: SCI-FI NEON (PAD 2)</button>
-            <button id="mode-toggle-btn" class="top-btn">MODE: TRIGGER (PAD 3)</button>
-            <button id="ui-toggle-btn" class="top-btn">TOGGLE UI (PAD 4)</button>
-            <button id="reset-fx-btn" class="top-btn" style="border-color: #ff2a55;">RESET FX (PAD 5)</button>
-            <button id="oh-shit-btn" class="top-btn" style="border-color: #ffea00; color: #ffea00;">OH SHIT! (OFF)</button>
+            <button id="bank-toggle-btn" class="top-btn" style="border-color: #00e5ff; color: #00e5ff; background: rgba(0,0,0,0.8);">BANK: SCI-FI NEON (◀/▶)</button>
+            <button id="mode-toggle-btn" class="top-btn">MODE: TRIGGER (SHIFT)</button>
+            <button id="ui-toggle-btn" class="top-btn">TOGGLE UI (TAB)</button>
+            <button id="reset-fx-btn" class="top-btn" style="border-color: #ff2a55;">RESET FX (ENTER)</button>
+            <button id="oh-shit-btn" class="top-btn" style="border-color: #ffea00; color: #ffea00;">OH SHIT! (OFF) (CTRL)</button>
         </div>
     </div>
 
@@ -492,7 +492,7 @@
                 scenes: popArtSceneNames.map((name, i) => ({ id: String.fromCharCode(65 + i), key: String.fromCharCode(97 + i), name, active: false, fade: 0 })),
                 effects: [
                     { id: '1', key: '1', name: 'DOT SCREEN', value: 0 }, { id: '2', key: '2', name: 'WARHOL MULTIPLY', value: 0 },
-                    { id: '3', key: '3', name: 'SQUASH & STRETCH', value: 0 }, { id: '4', key: '4', name: 'COLOR SNAP', value: 0 },
+                    { id: '3', key: '3', name: 'SQUASH & STRETCH', value: 0 }, { id: '4', key: '4', name: 'COLOR HUE', value: 0 },
                     { id: '5', key: '5', name: 'SPEED LINES', value: 0 }, { id: '6', key: '6', name: 'PAPER TEXTURE', value: 0 },
                     { id: '7', key: '7', name: 'UNASSIGNED', value: 0 }, { id: '8', key: '8', name: 'COMIC FLASH', value: 0 }
                 ]
@@ -552,7 +552,7 @@
         let targetRotX = 0, targetRotY = 0, targetRotZ = 0;
         let rotX = 0, rotY = 0, rotZ = 0;
         let orbitAngle = 0;
-        const moveState = { up: false, down: false, left: false, right: false };
+        const moveState = { up: false, down: false }; // Left & Right now remapped
         let engineTime = 0;
         let sceneMode = 'TRIGGER'; 
 
@@ -868,6 +868,7 @@
         const hudLayer = document.getElementById('hud-layer');
         const bankToggleBtn = document.getElementById('bank-toggle-btn');
         const resetFxBtn = document.getElementById('reset-fx-btn');
+        const ohShitBtn = document.getElementById('oh-shit-btn');
 
         function updateUI() {
             const currentBank = BANKS[activeBankIdx];
@@ -900,13 +901,14 @@
             updateUI();
         }
 
-        function toggleBank() {
+        function toggleBank(direction = 1) {
+            let dir = (typeof direction === 'number') ? direction : 1;
             BANKS[activeBankIdx].scenes.forEach(s => s.active = false); 
-            activeBankIdx = (activeBankIdx + 1) % 6; 
+            activeBankIdx = (activeBankIdx + dir + 6) % 6; 
             
             const b = BANKS[activeBankIdx];
             document.body.className = b.class || 'scifi-mode';
-            bankToggleBtn.innerText = `BANK: ${b.name} (PAD 2)`; 
+            bankToggleBtn.innerText = `BANK: ${b.name} (◀/▶)`; 
             bankToggleBtn.style.color = b.color; bankToggleBtn.style.borderColor = b.color;
             
             // Light Resets for Brutalist & Retro
@@ -915,16 +917,10 @@
 
             resetKnobs(); 
         }
-
-        bankToggleBtn.addEventListener('click', toggleBank);
-        resetFxBtn.addEventListener('click', resetKnobs);
-        document.getElementById('ui-toggle-btn').addEventListener('click', () => { hudLayer.style.opacity = hudLayer.style.opacity === '0' ? '1' : '0'; });
-        document.getElementById('mode-toggle-btn').addEventListener('click', () => { sceneMode = sceneMode === 'TRIGGER' ? 'LATCH' : 'TRIGGER'; document.getElementById('mode-toggle-btn').innerText = `MODE: ${sceneMode} (PAD 3)`; });
-
-        const ohShitBtn = document.getElementById('oh-shit-btn');
-        ohShitBtn.addEventListener('click', () => {
+        
+        function toggleOhShit() {
             isOhShitMode = !isOhShitMode;
-            ohShitBtn.innerText = `OH SHIT! (${isOhShitMode ? 'ON' : 'OFF'})`;
+            ohShitBtn.innerText = `OH SHIT! (${isOhShitMode ? 'ON' : 'OFF'}) (CTRL)`;
             if(isOhShitMode) {
                 ohShitBtn.style.backgroundColor = '#ffea00';
                 ohShitBtn.style.color = '#000';
@@ -932,7 +928,13 @@
                 ohShitBtn.style.backgroundColor = 'transparent';
                 ohShitBtn.style.color = '#ffea00';
             }
-        });
+        }
+
+        bankToggleBtn.addEventListener('click', toggleBank);
+        resetFxBtn.addEventListener('click', resetKnobs);
+        document.getElementById('ui-toggle-btn').addEventListener('click', () => { hudLayer.style.opacity = hudLayer.style.opacity === '0' ? '1' : '0'; });
+        document.getElementById('mode-toggle-btn').addEventListener('click', () => { sceneMode = sceneMode === 'TRIGGER' ? 'LATCH' : 'TRIGGER'; document.getElementById('mode-toggle-btn').innerText = `MODE: ${sceneMode} (SHIFT)`; });
+        ohShitBtn.addEventListener('click', toggleOhShit);
 
         // --- 8. KEYBOARD & MIDI HANDLING ---
         function handleSceneKey(key, isDown) {
@@ -948,20 +950,50 @@
         }
 
         window.addEventListener('keydown', (e) => {
-            if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab', 'Escape'].includes(e.code)) e.preventDefault(); 
+            const code = e.code || '';
+            const keyLower = (e.key || '').toLowerCase();
+
+            // 1. Robust System Key Interception (Stops browser from opening menus/scrolling/clicking buttons)
+            if (code === 'Enter' || code.startsWith('Alt') || code.startsWith('Control') || code.startsWith('Meta') || code === 'Tab' || code === 'Space' || code.startsWith('Arrow')) {
+                e.preventDefault();
+            }
+
             if (e.repeat) return; 
 
-            // Trigger global color flash if scene Z is active
-            triggerBgFlash(e.keyCode || e.key.charCodeAt(0));
+            // Trigger global color flash
+            triggerBgFlash(e.keyCode || (e.key ? e.key.charCodeAt(0) : 0));
 
-            const key = e.key.toLowerCase();
-            if (key === 'escape') resetKnobs(); // Map Escape to Reset
-            if (key === 'shift') { sceneMode = sceneMode === 'TRIGGER' ? 'LATCH' : 'TRIGGER'; document.getElementById('mode-toggle-btn').innerText = `MODE: ${sceneMode} (PAD 3)`; }
-            if (e.code === 'Tab') hudLayer.style.opacity = hudLayer.style.opacity === '0' ? '1' : '0';
-            if (e.code === 'Space') beatScale = 1.5;
-            if (key === 'arrowup') moveState.up = true; if (key === 'arrowdown') moveState.down = true; if (key === 'arrowleft') moveState.left = true; if (key === 'arrowright') moveState.right = true;
+            // 2. Handle System / UI Toggles
+            if (code === 'Enter') {
+                resetKnobs();
+                return;
+            }
+            if (code.startsWith('Control') || code.startsWith('Meta')) {
+                toggleOhShit();
+                return;
+            }
+            if (code.startsWith('Shift')) {
+                sceneMode = sceneMode === 'TRIGGER' ? 'LATCH' : 'TRIGGER'; 
+                document.getElementById('mode-toggle-btn').innerText = `MODE: ${sceneMode} (SHIFT)`;
+                return;
+            }
+            if (code === 'Tab') {
+                hudLayer.style.opacity = hudLayer.style.opacity === '0' ? '1' : '0';
+                return;
+            }
+            if (code === 'Space') {
+                beatScale = 1.5;
+                return;
+            }
+
+            // 3. Handle Directional Keys
+            if (code === 'ArrowUp') { moveState.up = true; return; }
+            if (code === 'ArrowDown') { moveState.down = true; return; }
+            if (code === 'ArrowLeft') { toggleBank(-1); return; }
+            if (code === 'ArrowRight') { toggleBank(1); return; }
             
-            const sceneIdx = BANKS[activeBankIdx].scenes.findIndex(s => s.key === key);
+            // 4. Handle Scenes & Effects (Letters & Numbers)
+            const sceneIdx = BANKS[activeBankIdx].scenes.findIndex(s => s.key === keyLower);
             if (sceneIdx !== -1) {
                 if (activeBankIdx === 4) {
                     spawnAura(36 + sceneIdx, 90 + Math.random() * 37);
@@ -975,16 +1007,27 @@
                 }
             }
 
-            handleSceneKey(key, true);
-            const effectConfig = BANKS[activeBankIdx].effects.find(eff => eff.key === key);
+            handleSceneKey(keyLower, true);
+            const effectConfig = BANKS[activeBankIdx].effects.find(eff => eff.key === keyLower);
             if(effectConfig && effectConfig.name !== 'UNASSIGNED') { effectConfig.value = 1.0; updateUI(); }
         });
 
         window.addEventListener('keyup', (e) => {
-            const key = e.key.toLowerCase();
-            if (key === 'arrowup') moveState.up = false; if (key === 'arrowdown') moveState.down = false; if (key === 'arrowleft') moveState.left = false; if (key === 'arrowright') moveState.right = false;
-            handleSceneKey(key, false);
-            const effectConfig = BANKS[activeBankIdx].effects.find(eff => eff.key === key); if(effectConfig) { effectConfig.value = 0.0; updateUI(); }
+            const code = e.code || '';
+            const keyLower = (e.key || '').toLowerCase();
+            
+            // Crucial: prevent default on keyup for Alt/Ctrl/Enter to stop OS menu focus hijacking
+            if (code === 'Enter' || code.startsWith('Alt') || code.startsWith('Control') || code.startsWith('Meta') || code.startsWith('Shift')) {
+                e.preventDefault();
+                return;
+            }
+            
+            if (code === 'ArrowUp') { moveState.up = false; return; }
+            if (code === 'ArrowDown') { moveState.down = false; return; }
+            
+            handleSceneKey(keyLower, false);
+            const effectConfig = BANKS[activeBankIdx].effects.find(eff => eff.key === keyLower); 
+            if(effectConfig) { effectConfig.value = 0.0; updateUI(); }
         });
 
         function setupMidiInput(input) {
@@ -1026,7 +1069,7 @@
                         else if (data1 === 38 || data1 === 39 || data1 === 45) toggleBank(); // Pad 2
                         else if (data1 === 40 || data1 === 41 || data1 === 46) { // Pad 3
                             sceneMode = sceneMode === 'TRIGGER' ? 'LATCH' : 'TRIGGER'; 
-                            document.getElementById('mode-toggle-btn').innerText = `MODE: ${sceneMode} (PAD 3)`; 
+                            document.getElementById('mode-toggle-btn').innerText = `MODE: ${sceneMode} (SHIFT)`; 
                         }
                         else if (data1 === 42 || data1 === 43 || data1 === 47) { // Pad 4
                             const hl = document.getElementById('hud-layer');
@@ -1133,7 +1176,6 @@
             engineTime += delta * speedMult;
             const t = engineTime;
 
-            if (moveState.left) targetRotY -= 0.03; if (moveState.right) targetRotY += 0.03;
             if (moveState.up) targetRotX -= 0.03; if (moveState.down) targetRotX += 0.03;
             targetRotZ *= 0.95;
 
@@ -1162,7 +1204,12 @@
                 if (eff[4].value > 0) { orbitAngle += delta * (eff[4].value * 2.0); camBaseX = Math.sin(orbitAngle) * 15; camBaseZ = Math.cos(orbitAngle) * 15; } else { orbitAngle = 0; }
                 currentFov += (eff[5].value * 55); 
                 bloomPass.strength = 0.4 + (beatScale - 1.0) * 0.6; glitchPass.enabled = Math.random() < (eff[7].value * 0.8);
-                document.body.style.filter = eff[3].value > 0 ? `invert(${eff[3].value * 100}%) hue-rotate(${eff[3].value * 180}deg)` : '';
+                
+                let filterStr = '';
+                if (eff[3].value > 0) filterStr += `invert(${eff[3].value * 100}%) `;
+                if (eff[2].value > 0) filterStr += `hue-rotate(${eff[2].value * 300}deg) `;
+                document.body.style.filter = filterStr.trim();
+                
                 scene.background = (eff[1].value > 0.05 && (Math.floor(t * (10 + eff[1].value * 30)) % 2 === 0)) ? new THREE.Color().setHSL(0, 0, eff[1].value) : new THREE.Color(0x05000a);
                 document.getElementById('scanlines').style.opacity = 0.3;
 
@@ -1170,9 +1217,13 @@
                 sciFiGroup.visible = false; popArtGroup.visible = true; brutalistGroup.visible = false; retroGroup.visible = false;
                 popArtPass.enabled = true; popArtPass.uniforms['dotScale'].value = eff[0].value; popArtPass.uniforms['gridSize'].value = 1.0 + Math.floor(eff[1].value * 4); popArtPass.uniforms['paperGrain'].value = eff[5].value;
                 const squash = 1.0 + (Math.sin(t*15) * eff[2].value * 0.5); masterGroup.scale.set(beatScale * (1.0/squash), beatScale * squash, beatScale);
-                sunburstMat.uniforms.color1.value = (eff[3].value > 0 && beatScale > 1.2) ? [new THREE.Color(0xffea00), new THREE.Color(0xff0044), new THREE.Color(0x00ccff)][Math.floor(Math.random()*3)] : new THREE.Color(0xffea00);
+                sunburstMat.uniforms.color1.value = new THREE.Color(0xffea00); // Fixed base color
                 sunburstMesh.visible = true; sunburstMat.uniforms.time.value = t;
                 if (eff[7].value > 0.05 && (Math.floor(t * (10 + eff[7].value * 30)) % 2 === 0)) scene.background = new THREE.Color(0xffffff);
+
+                if (eff[3].value > 0) {
+                    document.body.style.filter = `hue-rotate(${eff[3].value * 360}deg)`;
+                }
 
             } else if (activeBankIdx === 2) { // --- BRUTALIST ---
                 sciFiGroup.visible = false; popArtGroup.visible = false; brutalistGroup.visible = true; retroGroup.visible = false;
@@ -1191,7 +1242,7 @@
                 retroPass.uniforms.aspect.value = camera.aspect;
                 retroPass.uniforms.gridMult.value = 1.0 + Math.floor(eff[0].value * 5.0); // Grid Multiply
                 if (eff[1].value > 0.1 && (Math.floor(t * 20) % 2 === 0)) { dirLight.intensity = 0; ambLight.intensity = 0; } else { dirLight.intensity = 3; ambLight.intensity = 1; } // Strobe
-                retroPass.uniforms.hueShift.value = eff[2].value; // Hue Cycle
+                retroPass.uniforms.hueShift.value = t * eff[2].value * 0.5; // Hue Cycle (Animated Continuous Cycle)
                 if(eff[3].value > 0) { cx += (Math.random()-0.5) * 15 * eff[3].value; cy += (Math.random()-0.5) * 15 * eff[3].value; } // Shake
                 retroPass.uniforms.kaleidoscope.value = eff[4].value; // Kaleidoscope
                 
@@ -1214,7 +1265,7 @@
 
                 const auraParams = {
                     swirlSpeed: eff[0].value, sizeMultiplier: eff[1].value, glowIntensity: eff[2].value, fadeSpeed: eff[3].value,
-                    hueShift: eff[4].value, turbulence: eff[5].value, saturation: eff[7].value, pulse: Math.max(0, beatScale - 1.0)
+                    hueShift: eff[4].value * 0.85, turbulence: eff[5].value, saturation: eff[7].value, pulse: Math.max(0, beatScale - 1.0)
                 };
 
                 for (let i = auras.length - 1; i >= 0; i--) {
@@ -1237,7 +1288,7 @@
                 fractalPass.uniforms.density.value = eff[1].value;
                 fractalPass.uniforms.glow.value = eff[2].value;
                 fractalPass.uniforms.chaos.value = eff[3].value;
-                fractalPass.uniforms.hueShift.value = eff[4].value;
+                fractalPass.uniforms.hueShift.value = eff[4].value * 0.85;
                 fractalPass.uniforms.rotation.value = eff[5].value;
                 fractalPass.uniforms.symmetry.value = eff[7].value;
                 fractalPass.uniforms.pulse.value = Math.max(0, beatScale - 1.0);
